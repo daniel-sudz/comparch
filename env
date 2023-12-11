@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # load the comparch environment 
-function load_comparch_env(){
+function comparch(){
 	
 	export OSS_TOOLS_ROOT="$HOME/Desktop/comparch-tools/oss-cad-suite"
 	export COMPARCH_TOOLS_ROOT="$HOME/Desktop/comparch-tools"
@@ -14,6 +14,9 @@ function load_comparch_env(){
 	# enable amd/xilinx
 	source "$VIVADO_TOOLS_ROOT/settings64.sh"
 
+	# enable python
+	source "$COMPARCH_TOOLS_ROOT/python-comparch/bin/activate"
+
 	# supress annoying warnings
 	# note: this pip3 is injected from OSS_TOOLS_ROOT so it wont pollute global
 	pip3 config set global.disable-pip-version-check true
@@ -22,5 +25,5 @@ function load_comparch_env(){
 	$CAFE_REPO_ROOT/tools/check_install
 }
 
-#load_comparch_env;
+#comparch;
 
