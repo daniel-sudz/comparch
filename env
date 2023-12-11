@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# load the comparch environment 
+function load_comparch_env(){
+	
+	export OSS_TOOLS_ROOT="$HOME/Desktop/comparch-tools/oss-cad-suite"
+	export COMPARCH_TOOLS_ROOT="$HOME/Desktop/comparch-tools"
+	export VIVADO_TOOLS_ROOT="$HOME/Desktop/comparch-tools/archive-tools/xilinx/Vivado/2023.2"
+	export CAFE_REPO_ROOT="$HOME/Desktop/comparch-tools/olin-cafe-f23"
+
+	# enable the GTKWAVE
+	export PATH="$PATH:$COMPARCH_TOOLS_ROOT/gtkwave/build/src"
+
+	# enable amd/xilinx
+	source "$VIVADO_TOOLS_ROOT/settings64.sh"
+
+	# supress annoying warnings
+	# note: this pip3 is injected from OSS_TOOLS_ROOT so it wont pollute global
+	pip3 config set global.disable-pip-version-check true
+
+	# verify the environment
+	$CAFE_REPO_ROOT/tools/check_install
+}
+
+#load_comparch_env;
+
