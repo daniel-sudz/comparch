@@ -9,7 +9,10 @@ module test_sample ();
     initial begin
 
         in_1 = 1;
+        
+        $display("in_1 %d, out_1 %d", in_1, out_1);
         assert(in_1 == out_1)
+
 
         $finish;
     end

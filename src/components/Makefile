@@ -18,3 +18,5 @@ clean:
 # Sample file to compile
 test_sample : tests/test_sample.sv sample*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+all: test_sample
