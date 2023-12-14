@@ -20,7 +20,10 @@ test_sample : tests/test_sample.sv src/sample*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
 # Test mux
-test_mux : tests/test_mux.sv src/muxes/*.sv
+test_muxes_our : tests/our/test_muxes.sv src/muxes/*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-all: test_sample test_mux
+test_muxes_provided : tests/provided/test_muxes.sv src/muxes/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+all: test_sample test_muxes_our test_muxes_provided
