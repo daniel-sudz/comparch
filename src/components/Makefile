@@ -19,4 +19,8 @@ clean:
 test_sample : tests/test_sample.sv sample*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-all: test_sample
+# Test mux
+test_mux : tests/test_mux.sv mux*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+all: test_sample test_mux
