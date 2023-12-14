@@ -1,5 +1,5 @@
 
-module mux_2_1(in_0, in_1, s, out);
+module mux2(in_0, in_1, s, out);
 
     parameter  N = 32;
     

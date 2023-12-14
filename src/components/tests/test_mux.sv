@@ -15,13 +15,13 @@ module test_mux ();
 
     wire [N-1:0] mux_output [4:0];
 
-    mux_2_1 mux21_a(
+    mux2 mux21_a(
          mux_input[0],
          mux_input[1],
          mux_select_1bit,
          mux_output[0]);
 
-    mux_4_1 mux41_a(
+    mux4 mux41_a(
          mux_input[0],
          mux_input[1],
          mux_input[2],
@@ -29,7 +29,7 @@ module test_mux ();
          mux_select_2bit,
          mux_output[1]);
 
-    mux_8_1 mux81_a(
+    mux8 mux81_a(
          mux_input[0],
          mux_input[1],
          mux_input[2],
@@ -41,7 +41,7 @@ module test_mux ();
          mux_select_3bit,
          mux_output[2]);
     
-    mux_16_1 mux161_a(
+    mux16 mux161_a(
         mux_input[0],
         mux_input[1],
         mux_input[2],
@@ -61,7 +61,7 @@ module test_mux ();
         mux_select_4bit,
         mux_output[3]);
     
-    mux_32_1 mux321_a(
+    mux32 mux321_a(
         mux_input[0],
         mux_input[1],
         mux_input[2],

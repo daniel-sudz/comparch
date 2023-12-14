@@ -16,11 +16,11 @@ clean:
 #########################################################################
 
 # Sample file to compile
-test_sample : tests/test_sample.sv sample*.sv
+test_sample : tests/test_sample.sv src/sample*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
 # Test mux
-test_mux : tests/test_mux.sv mux*.sv
+test_mux : tests/test_mux.sv src/muxes/*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
 all: test_sample test_mux
