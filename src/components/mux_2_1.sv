@@ -1,19 +1,17 @@
 
-module mux_2_1(input_1, input_2, select, mux_output);
+module mux_2_1(in_0, in_1, s, out);
 
     parameter  N = 32;
     
     /* ----- Inputs  ----- */
-    input wire [N-1:0] input_1; 
-    input wire [N-1:0] input_2; 
-
-    input wire select;
+    input wire [N-1:0] in_0, in_1; 
+    input wire s;
 
     /* ----- Outputs  ----- */
-    output logic [N-1:0] mux_output;
+    output logic [N-1:0] out;
 
     /* ----- Design  ----- */
-    assign mux_output = select ? input_2 : input_1;
+    assign out = s ? in_1 : in_0;
 
 
 endmodule

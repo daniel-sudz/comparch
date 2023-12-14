@@ -1,24 +1,24 @@
 
 /* Design of 4-1 mux using binary module pattern */
-module mux_4_1(input_1, input_2, input_3, input_4, select, mux_output);
+module mux_4_1(in_0, in_1, in_2, in_3, s, out);
 
     parameter  N = 32;
     
     /* ----- Inputs  ----- */
-    input wire [N-1:0] input_1, input_2, input_3, input_4; 
-    input wire [1:0] select;
+    input wire [N-1:0] in_0, in_1, in_2, in_3;
+    input wire [1:0] s;
 
     /* ----- Outputs  ----- */
-    output logic [N-1:0] mux_output;
+    output logic [N-1:0] out;
 
     /* -----  Submodules -----  */ 
     logic [N-1:0] block_1_out ;
-    mux_2_1 block_1(.input_1(input_1), .input_2(input_3), .select(select[1]), .mux_output(block_1_out) );
+    mux_2_1 block_1(in_0, in_2, s[1], block_1_out);
 
     logic [N-1:0] block_2_out ;
-    mux_2_1 block_2(.input_1(input_2), .input_2(input_4), .select(select[1]), .mux_output(block_2_out) );
+    mux_2_1 block_2(in_1, in_3, s[1], block_2_out);
 
     logic [N-1:0] block_3_out ;
-    mux_2_1 block_3(.input_1(block_1_out), .input_2(block_2_out), .select(select[0]), .mux_output(mux_output) );
+    mux_2_1 block_3(block_1_out, block_2_out, s[0], out);
 
 endmodule
