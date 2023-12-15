@@ -10,11 +10,11 @@
 - [x] mux32
 
 ### Decoders
-- [ ] decoder_1_to_2
-- [ ] decoder_2_to_4
-- [ ] decoder_3_to_8
-- [ ] decoder_4_to_16
-- [ ] decoder_5_to_32
+- [x] decoder_1_to_2
+- [x] decoder_2_to_4
+- [x] decoder_3_to_8
+- [x] decoder_4_to_16
+- [x] decoder_5_to_32
 
 
 
