@@ -15,9 +15,13 @@ module test_mux ();
     logic [2:0] in_3_to_8;
     logic [7:0] out_3_to_8;
 
+    logic [3:0] in_4_to_16;
+    logic [15:0] out_4_to_16;
+
     decoder_1_to_2 d1to2(.in(in_1_to_2), .ena(enabled), .out(out_1_to_2));
     decoder_2_to_4 d2to4(.in(in_2_to_4), .ena(enabled), .out(out_2_to_4));
     decoder_3_to_8 d3to8(.in(in_3_to_8), .ena(enabled), .out(out_3_to_8));
+    decoder_4_to_16 d4to16(.in(in_4_to_16), .ena(enabled), .out(out_4_to_16));
 
 
 
@@ -35,6 +39,7 @@ module test_mux ();
             in_1_to_2 = $urandom();
             in_2_to_4 = $urandom();
             in_3_to_8 = $urandom();
+            in_4_to_16 = $urandom();
             
             /* Set the enabled state */
             enabled = is_enabled[0];
@@ -69,6 +74,17 @@ module test_mux ();
                 assert(out_3_to_8 == 0) else $fatal;
              end else begin
                 assert(out_3_to_8 == (1 << in_3_to_8)) else $fatal;
+             end
+            print_break();
+
+
+            /* Test 4-to-16 decoder */
+            print_break();
+             $display("[4-to-16 decoder test]: [is_enabled: %0d] [in: %0d] [out: %0d] [out_exp_if_ena: %0d]", is_enabled, in_4_to_16, out_4_to_16, (1 << in_4_to_16));
+             if(is_enabled == 0) begin
+                assert(out_4_to_16 == 0) else $fatal;
+             end else begin
+                assert(out_4_to_16 == (1 << in_4_to_16)) else $fatal;
              end
             print_break();
 
