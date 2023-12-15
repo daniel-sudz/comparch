@@ -26,4 +26,15 @@ test_muxes_our : tests/our/test_muxes.sv src/muxes/*.sv
 test_muxes_provided : tests/provided/test_muxes.sv src/muxes/*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-all: test_sample test_muxes_our test_muxes_provided
+test_muxes_all: test_muxes_our test_muxes_provided
+
+# Test decoders
+test_decoders_our : tests/our/test_decoders.sv src/decoders/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+test_decoders_provided : tests/provided/test_decoders.sv src/decoders/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+test_decoders_all: test_decoders_our test_decoders_provided
+
+all: test_sample test_muxes_all test_decoders_all
