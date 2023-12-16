@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-/* Implements a standard sll shifter
+/* Implements a standard sll shifter (shift logical left)
  *      .in -> the 32-bit input to the shifter
  *      .shamt -> how much to shift to the left
  *
