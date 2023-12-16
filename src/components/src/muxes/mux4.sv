@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+`default_nettype none
 
 /* Design of 4-1 mux using binary module pattern */
 module mux4(in0, in1, in2, in3, s, out);

@@ -41,7 +41,10 @@ test_decoders_all: test_decoders_our test_decoders_provided
 test_shifters_our: tests/our/test_shifters.sv src/**/*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-test_shifters_all:  test_shifters_our
+test_shifters_provided: tests/provided/test_shifters.sv src/**/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+test_shifters_all:  test_shifters_our test_shifters_provided
 
 
 all: test_sample test_muxes_all test_decoders_all test_shifters_all
