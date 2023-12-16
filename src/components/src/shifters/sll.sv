@@ -1,6 +1,12 @@
 `timescale 1ns/1ps
 `default_nettype none
 
+/* Implements a standard sll shifter
+ *      .in -> the 32-bit input to the shifter
+ *      .shamt -> how much to shift to the left
+ *
+ *      .out -> the shifted output
+ */   
 module sll(in, shamt, out);
 
     parameter N=32;
