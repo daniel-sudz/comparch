@@ -46,5 +46,14 @@ test_shifters_provided: tests/provided/test_shifters.sv src/**/*.sv
 
 test_shifters_all:  test_shifters_our test_shifters_provided
 
+# Test comparators
+test_comparators_our: tests/our/test_comparators.sv src/**/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-all: test_sample test_muxes_all test_decoders_all test_shifters_all
+test_comparators_provided: tests/provided/test_comparators.sv src/**/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+test_comparators_all:  test_comparators_our test_comparators_provided
+
+
+all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all
