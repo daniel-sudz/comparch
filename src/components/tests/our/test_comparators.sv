@@ -3,7 +3,7 @@
 
 /* Test comparators */
 
-module test_comparators ();
+module test_comparators;
 
     parameter N = 32;
 
@@ -28,7 +28,10 @@ module test_comparators ();
     endfunction
 
     initial begin
-        for(int test_cases=0; test_cases<1000; test_cases++) begin
+        $dumpfile("comparators-ours.fst");
+        $dumpvars(0, test_comparators);
+
+        for(int test_cases=0; test_cases<10000; test_cases++) begin
 
             /* Test compare_eq */
             print_break();
@@ -58,7 +61,7 @@ module test_comparators ();
             
             input_a = $urandom();
             input_b = input_a;
-            expected_compare_eq_out = (input_a < input_b);
+            expected_compare_lt_out = (input_a < input_b);
             #10;
             $display("[compare_lt]: [a: %0d], [b: %0d], [out: %0d] [expected_out: %0d]", input_a, input_b, compare_lt_out, expected_compare_lt_out);
             assert(compare_lt_out == expected_compare_lt_out) else $fatal;
@@ -68,4 +71,5 @@ module test_comparators ();
         end
         $finish;
     end
+
 endmodule
