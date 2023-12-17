@@ -1,3 +1,6 @@
+`timescale 1ns/1ps
+`default_nettype none
+
 /* Test muxes */
 
 module test_mux ();

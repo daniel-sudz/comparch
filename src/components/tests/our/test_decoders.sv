@@ -1,6 +1,9 @@
-/* Test muxes */
+`timescale 1ns/1ps
+`default_nettype none
 
-module test_mux ();
+/* Test decoders */
+
+module test_decoders ();
 
     parameter N = 32;
 
