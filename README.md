@@ -30,7 +30,9 @@
 - [x] decoder_4_to_16 (binary design)
 - [x] decoder_5_to_32 (binary design)
 
-
+### Comparators
+- [x] comparator_eq (gate level w/ codegen)
+- [x] comparator_lt (gate level w/ codegen)
 
 
 ## Harris and Harris
