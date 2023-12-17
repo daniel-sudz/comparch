@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+`default_nettype none
 
 /* Implements a standard 2-4 decoder 
  *      .ena -> whether the module is enabled or not

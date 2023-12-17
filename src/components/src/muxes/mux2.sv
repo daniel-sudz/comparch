@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+`default_nettype none
 
 module mux2(in0, in1, s, out);
 

@@ -49,7 +49,7 @@ module test_mux ();
             enabled = is_enabled[0];
 
             /* Wait for hardware */ 
-            #100;
+            #10;
 
             /* Test 1-to-2 decoder */
             print_break();

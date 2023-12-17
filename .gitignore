@@ -3,3 +3,4 @@ gtkwave/
 archive-tools/
 python-comparch/
 *.bin
+*.fst

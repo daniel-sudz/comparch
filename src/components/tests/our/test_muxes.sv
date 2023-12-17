@@ -124,7 +124,7 @@ module test_mux ();
                 print_break();
                 for(int input_selector=0; input_selector < 2; input_selector++) begin
                     mux_select_1bit = input_selector;
-                    #100;
+                    #10;
                     print_test_input(2, mux_output[0], mux_select_1bit);
                     assert(mux_output[0] == mux_input[mux_select_1bit]) else $fatal;
                 end
@@ -134,7 +134,7 @@ module test_mux ();
                 print_break();
                 for(int input_selector=0; input_selector < 4; input_selector++) begin
                     mux_select_2bit = input_selector;
-                    #100;
+                    #10;
                     print_test_input(4, mux_output[1], input_selector);
                     assert(mux_output[1] == mux_input[mux_select_2bit]) else $fatal;
                 end
@@ -144,7 +144,7 @@ module test_mux ();
                 print_break();
                 for(int input_selector=0; input_selector < 8; input_selector++) begin
                     mux_select_3bit = input_selector;
-                    #100;
+                    #10;
                     print_test_input(8, mux_output[2], input_selector);
                     assert(mux_output[2] == mux_input[mux_select_3bit]) else $fatal;
                 end
@@ -154,7 +154,7 @@ module test_mux ();
                 print_break();
                 for(int input_selector=0; input_selector < 16; input_selector++) begin
                     mux_select_4bit = input_selector;
-                    #100;
+                    #10;
                     print_test_input(16, mux_output[3], input_selector);
                     assert(mux_output[3] == mux_input[mux_select_4bit]) else $fatal;
                 end
@@ -165,7 +165,7 @@ module test_mux ();
                 print_break();
                 for(int input_selector=0; input_selector < 32; input_selector++) begin
                     mux_select_5bit = input_selector;
-                    #100;
+                    #10;
                     print_test_input(32, mux_output[4], input_selector);
                     assert(mux_output[4] == mux_input[mux_select_5bit]) else $fatal;
                 end
