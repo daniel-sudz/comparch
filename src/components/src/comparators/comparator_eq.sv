@@ -32,7 +32,6 @@ module comparator_eq(a, b, out);
 
 
     /* ----- Design  ----- */
-    assign out = 0;
 
     /* Base case */
     assign eq_partials[0] = ~(a[0] ^ b[0]);
