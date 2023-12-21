@@ -15,6 +15,10 @@ clean:
 ## Misc. Combinational Components
 #########################################################################
 
+# Compile only
+compile : src/**/*.sv
+	${IVERILOG} $^ -o $@.bin
+
 # Sample file to compile
 test_sample : tests/test_sample.sv src/sample*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}

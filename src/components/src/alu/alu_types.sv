@@ -1,3 +1,6 @@
+`timescale 1ns/1ps
+`default_nettype none
+
 `ifndef ALU_TYPES_H
 `define ALU_TYPES_H
 
