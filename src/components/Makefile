@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests -Y.sv -I./ -DSIMULATION
+IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests -Y.sv -I src/alu -DSIMULATION
 VVP=vvp
 VVP_POST=-fst
 WAVES=gtkwave --rcvar 'fontname_signals Monospace 20' --rcvar 'fontname_waves Monospace 20'
@@ -16,7 +16,7 @@ clean:
 #########################################################################
 
 # Compile only
-compile : src/**/*.sv
+compile : src/alu/alu_types.sv src/**/*.sv
 	${IVERILOG} $^ -o $@.bin
 
 # Sample file to compile
