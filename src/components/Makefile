@@ -20,10 +20,13 @@ test_sample : tests/test_sample.sv src/sample*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
 # Test adders
+test_adders_our : tests/our/test_adders.sv src/**/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
 test_adders_provided : tests/provided/test_adder_1.sv src/**/*.sv
 	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-test_adders_all: test_adders_provided
+test_adders_all: test_adders_our test_adders_provided
 
 # Test mux
 test_muxes_our : tests/our/test_muxes.sv src/**/*.sv

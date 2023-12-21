@@ -1,7 +1,5 @@
-/*
-  a 1 bit addder that we can daisy chain for 
-  ripple carry adders
-*/
+`timescale 1ns/1ps
+`default_nettype none
 
 /* Implements a standard 1 bit adder that we can daisy chain for ripple carry adders
  *      .a -> 1 bit from first number to add
