@@ -67,6 +67,13 @@ module alu(a, b, control, result, overflow, zero, equal);
     srl #(N) srl_alu_shifter(.in(a), .shamt(b[$clog2(N)-1:0]), .out(NO_OVERFLOW_RESULT_ALU_SRL));
     assign RESULT_ALU_SRL = NO_OVERFLOW_RESULT_ALU_SRL & (~shift_overflow_mask);
 
+    /* ----- [SRA] Operation Result  ----- */
+    logic [N-1:0] NO_OVERFLOW_RESULT_ALU_SRA;
+    sra #(N) sra_alu_shifter(.in(a), .shamt(b[$clog2(N)-1:0]), .out(NO_OVERFLOW_RESULT_ALU_SRA));
+    assign RESULT_ALU_SRA = NO_OVERFLOW_RESULT_ALU_SRA & (~shift_overflow_mask);
+
+
+
     /* ----- [Equal] Operation Result   ----- */
     comparator_eq eqcmp(.a(a), .b(b), .out(equal));
 
@@ -83,7 +90,7 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in4(32'b0),
         .in5(RESULT_ALU_SLL),
         .in6(RESULT_ALU_SRL),
-        .in7(32'b0),
+        .in7(RESULT_ALU_SRA),
         .in8(32'b0),
         .in9(32'b0),
         .in10(32'b0),
@@ -105,8 +112,8 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in4(1'b0),
         .in5(1'b0),
         .in6(1'b0),
-        .in7(RESULT_ADD_OVERFLOW),
-        .in8(RESULT_SUB_OVERFLOW),
+        .in7(1'b0),
+        .in8(1'b0),
         .in9(1'b0),
         .in10(1'b0),
         .in11(1'b0),
