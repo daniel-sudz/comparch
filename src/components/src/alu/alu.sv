@@ -71,8 +71,26 @@ module alu(a, b, control, result, overflow, zero, equal);
     logic [N-1:0] NO_OVERFLOW_RESULT_ALU_SRA;
     sra #(N) sra_alu_shifter(.in(a), .shamt(b[$clog2(N)-1:0]), .out(NO_OVERFLOW_RESULT_ALU_SRA));
     assign RESULT_ALU_SRA = NO_OVERFLOW_RESULT_ALU_SRA & (~shift_overflow_mask);
+    
+    /* ----- [ADD/SUB] Helper States  ----- */
+    logic both_in_negative;
+    assign both_in_negative = a[N-1] & b[N-1];
 
+    logic both_in_positive;
+    assign both_in_positive = (~a[N-1]) & (~b[N-1]);
 
+    logic both_in_diff;
+    assign both_in_diff = (~both_in_negative) & (~both_in_positive);
+
+    /* ----- [ADD] Operation Result  ----- */
+    logic [N-1:0] NO_OVERFLOW_RESULT_ALU_ADD;
+    logic NO_OVERFLOW_ADD_CARY;
+    adder_n #(N) adder_n_alu_add(.a(a), .b(b), .c_in(1'b0), .c_out(NO_OVERFLOW_ADD_CARY), .sum(NO_OVERFLOW_RESULT_ALU_ADD));
+
+    assign RESULT_ALU_ADD = {
+        (both_in_negative) | (both_in_diff & NO_OVERFLOW_RESULT_ALU_ADD[N-1]),
+        NO_OVERFLOW_RESULT_ALU_ADD[N-2:0]
+    };
 
     /* ----- [Equal] Operation Result   ----- */
     comparator_eq eqcmp(.a(a), .b(b), .out(equal));
@@ -91,7 +109,7 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in5(RESULT_ALU_SLL),
         .in6(RESULT_ALU_SRL),
         .in7(RESULT_ALU_SRA),
-        .in8(32'b0),
+        .in8(RESULT_ALU_ADD),
         .in9(32'b0),
         .in10(32'b0),
         .in11(32'b0),
