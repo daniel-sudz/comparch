@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests -Y.sv -I src/alu -DSIMULATION
+IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests/provided -Y.sv -I src/alu -DSIMULATION
 VVP=vvp
 VVP_POST=-fst
 WAVES=gtkwave --rcvar 'fontname_signals Monospace 20' --rcvar 'fontname_waves Monospace 20'
@@ -68,5 +68,11 @@ test_comparators_provided: tests/provided/test_comparators.sv src/**/*.sv
 
 test_comparators_all:  test_comparators_our test_comparators_provided
 
+# Test alu
+test_alu_provided: tests/provided/test_alu.sv src/**/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all
+test_alu_all: test_alu_provided
+
+
+all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all
