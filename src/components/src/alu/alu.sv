@@ -34,13 +34,38 @@ module alu(a, b, control, result, overflow, zero, equal);
     logic RESULT_SUB_OVERFLOW;
 
     /* ----- [AND] Operation Result  ----- */
-    genvar i;
+    assign RESULT_ALU_AND = a & b;
+
+    /* ----- [OR] Operation Result  ----- */
+    assign RESULT_ALU_OR = a | b;
+
+    /* ----- [XOR] Operation Result  ----- */
+    assign RESULT_ALU_XOR = a ^ b;
+
+    /* ----- [SHIFTERS] Helper States  ----- */
+    /* Add helper states for when b >= $clog2(N) which overflow the shifters that we implemented*/
+    logic [N:0] shift_overflow;
+    assign shift_overflow[N] = 0;
+
     generate
-        for(i=0;i<N;i++) begin
-            assign RESULT_ALU_AND[i] = a[i] & b[i];
+        genvar i;
+        for(i=N-1;i>=$clog2(N);i--) begin
+            assign shift_overflow[i] = shift_overflow[i+1] | b[i];
         end
     endgenerate
 
+    logic [N-1:0] shift_overflow_mask;
+    assign shift_overflow_mask = {N{shift_overflow[$clog2(N)]}};
+
+    /* ----- [SLL] Operation Result  ----- */
+    logic [N-1:0] NO_OVERFLOW_RESULT_ALU_SLL;
+    sll #(N) sll_alu_shifter(.in(a), .shamt(b[$clog2(N)-1:0]), .out(NO_OVERFLOW_RESULT_ALU_SLL));
+    assign RESULT_ALU_SLL = NO_OVERFLOW_RESULT_ALU_SLL & (~shift_overflow_mask);
+
+    /* ----- [SRL] Operation Result  ----- */
+    logic [N-1:0] NO_OVERFLOW_RESULT_ALU_SRL;
+    srl #(N) srl_alu_shifter(.in(a), .shamt(b[$clog2(N)-1:0]), .out(NO_OVERFLOW_RESULT_ALU_SRL));
+    assign RESULT_ALU_SRL = NO_OVERFLOW_RESULT_ALU_SRL & (~shift_overflow_mask);
 
     /* ----- [Equal] Operation Result   ----- */
     comparator_eq eqcmp(.a(a), .b(b), .out(equal));
@@ -55,13 +80,13 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in1(RESULT_ALU_AND),
         .in2(RESULT_ALU_OR),
         .in3(RESULT_ALU_XOR),
-        .in4(RESULT_ALU_SLL),
-        .in5(RESULT_ALU_SRL),
-        .in6(RESULT_ALU_SRA),
-        .in7(RESULT_ALU_ADD),
-        .in8(RESULT_ALU_SUB),
-        .in9(RESULT_ALU_SLT),
-        .in10(RESULT_ALU_SLTU),
+        .in4(32'b0),
+        .in5(RESULT_ALU_SLL),
+        .in6(32'b0),
+        .in7(32'b0),
+        .in8(32'b0),
+        .in9(32'b0),
+        .in10(32'b0),
         .in11(32'b0),
         .in12(32'b0),
         .in13(32'b0),
