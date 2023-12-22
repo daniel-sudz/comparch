@@ -82,7 +82,7 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in3(RESULT_ALU_XOR),
         .in4(32'b0),
         .in5(RESULT_ALU_SLL),
-        .in6(32'b0),
+        .in6(RESULT_ALU_SRL),
         .in7(32'b0),
         .in8(32'b0),
         .in9(32'b0),
