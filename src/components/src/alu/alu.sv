@@ -4,51 +4,53 @@
 `include "alu_types.sv"
 
 module alu(a, b, control, result, overflow, zero, equal);
-parameter N = 32;
+    parameter N = 32;
+    
+     /* ----- Inputs  ----- */
+    input wire signed [N-1:0] a, b;
+    input alu_control_t control;
 
-input wire signed [N-1:0] a, b;
-input alu_control_t control;
+     /* ----- Outputs  ----- */
+    output logic signed [N-1:0] result;                 // Result of the selected operation.
 
-output logic signed [N-1:0] result; // Result of the selected operation.
+    output logic overflow;                              // Is high if the result of an ADD or SUB wraps around the 32 bit boundary.
+    output logic zero;                                  // Is high if the result is ever all zeros.
+    output logic equal;                                 // is high if a == b.
 
-output logic overflow; // Is high if the result of an ADD or SUB wraps around the 32 bit boundary.
-output logic zero;  // Is high if the result is ever all zeros.
-output logic equal; // is high if a == b.
+    /* ----- Output Operations  ----- */
+    logic [N-1:0] RESULT_ALU_AND; 
+    logic [N-1:0] RESULT_ALU_OR; 
+    logic [N-1:0] RESULT_ALU_XOR;
+    logic [N-1:0] RESULT_ALU_SLL;
+    logic [N-1:0] RESULT_ALU_SRL;
+    logic [N-1:0] RESULT_ALU_SRA;
+    logic [N-1:0] RESULT_ALU_ADD;
+    logic [N-1:0] RESULT_ALU_SUB;
+    logic [N-1:0] RESULT_ALU_SLT;
+    logic [N-1:0] RESULT_ALU_SLTU;
+    
+    
 
-logic unsigned [N-1:0] unsigned_a, unsigned_b; // behavioural logic doesn't work right without setting signed or unsigned. Pretty much just for SLTU
-logic carry_out;
-logic [N-1:0] sum, difference;
-
-always_comb begin : behavioural_alu_logic
-  unsigned_a = a;
-  unsigned_b = b;
-  {carry_out, sum} = a + b;
-  difference = a - b;
-  case (control) // This is how you make  a MUX.
-    ALU_AND: result = a & b;
-    ALU_OR : result = a | b;
-    ALU_XOR : result = a ^ b;
-    ALU_SLL : result = a << b;
-    ALU_SRL : result = a >>  b;
-    ALU_SRA : result = (unsigned_b >= 32'd32) ? 0 : a >>> unsigned_b;
-    ALU_ADD : result = sum;
-    ALU_SUB : result = difference;
-    ALU_SLT : result = { {(N-1){1'b0}}, a < b };
-    ALU_SLTU : result = { {(N-1){1'b0}}, unsigned_a < unsigned_b};
-    default : result = 0;
-  endcase
-
-  equal = (a == b);
-  zero = (result == {{N{1'b0}}});
-  case (control) 
-    ALU_SLTU, ALU_SLT, ALU_SUB: begin
-      overflow = (a[N-1] != b[N-1]) && (a[N-1] != difference[N-1]); 
-    end
-    ALU_ADD : begin
-      overflow = (a[N-1] == b[N-1]) && (a[N-1] != sum[N-1]);
-    end
-    default: overflow = 0;
-  endcase
-end
+     /* ----- Mux Operation Results  ----- */
+    mux16 result_mux(
+        .in0(RESULT_ALU_AND),
+        .in1(RESULT_ALU_OR),
+        .in2(RESULT_ALU_XOR),
+        .in3(RESULT_ALU_SLL),
+        .in4(RESULT_ALU_SRL),
+        .in5(RESULT_ALU_SRA),
+        .in6(RESULT_ALU_ADD),
+        .in7(RESULT_ALU_SUB),
+        .in8(RESULT_ALU_SLT),
+        .in9(RESULT_ALU_SLTU),
+        .in10(32'b0),
+        .in11(32'b0),
+        .in12(32'b0),
+        .in13(32'b0),
+        .in14(32'b0),
+        .in15(32'b0),
+        .s(control),
+        .out(result)
+    );
 
 endmodule
