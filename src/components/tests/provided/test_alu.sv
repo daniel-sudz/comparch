@@ -6,7 +6,7 @@ module test_alu;
 
 parameter N = 32; // Don't need to support other numbers, just using this as a constant.
 parameter N_TEST_VECTOR = 29; // Change this number based on how many cases you implement in alu_testcases.memh
-parameter N_RANDOM_TESTS = 25;
+parameter N_RANDOM_TESTS = 1000;
 parameter MAX_ERRORS = 1; // You can change this number to have the test fail earlier or later if too many errors are encounterd. Can make it easier to sift through waveforms.
 
 logic [N-1:0] a, b; // Inputs to the ALU.
@@ -111,22 +111,14 @@ always @(a or b or control) begin
   // For excelling, change the warnings to errors.
   if(overflow !== correct_overflow) begin
     $display("@%t: Warning: OVERFLOW  : a = %h, b = %h, result = %h, overflow = %b, should be %b", $time, a, b, result, overflow, correct_overflow);
-    warnings = warnings + 1;
-    // errors = errors + 1;
+    errors = errors + 1;
   end
   
   if(result !== correct_result) begin
     errors_by_op[control] = errors_by_op[control] + 1;
-    // Remove this if condition if you are aiming to excel.
-    if(control === ALU_SLTU) begin
-      $display("@%t: Warning: %s  : a = %h, b = %h, result = %h, should be %h", 
-      $time, alu_control_name(control), a, b, result, correct_result);
-      warnings = warnings + 1;
-    end else begin
-      $display("@%t: Error: %s  : a = %h, b = %h, result = %h, should be %h", 
-        $time, alu_control_name(control), a, b, result, correct_result);
-      errors = errors + 1;
-    end
+    $display("@%t: Error: %s  : a = %h, b = %h, result = %h, should be %h", 
+    $time, alu_control_name(control), a, b, result, correct_result);
+    errors = errors + 1;
   end
 
   if(errors > MAX_ERRORS) begin

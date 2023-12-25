@@ -87,6 +87,12 @@ module alu(a, b, control, result, overflow, zero, equal);
     /* Overflow happens when a and b have the same sign which is different from the result sign */
     assign RESULT_SUB_OVERFLOW = (~(a[N-1] ^ (~b[N-1]))) & (a[N-1] ^ RESULT_ALU_SUB[N-1]);
     
+    /* ----- [SLT] Operation Result  ----- */
+    comparator_lt #(N) set_less_than_alu(.a(a), .b(b), .out(RESULT_ALU_SLT));
+
+    /* ----- [SLTU] Operation Result  ----- */
+    comparator_lt #(N+1) set_less_than_unsigned_alu(.a({1'b0, a}), .b({1'b0, b}), .out(RESULT_ALU_SLTU));
+    
 
     /* ----- [Equal] Operation Result   ----- */
     comparator_eq eqcmp(.a(a), .b(b), .out(equal));
@@ -110,9 +116,9 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in10(32'b0),
         .in11(32'b0),
         .in12(RESULT_ALU_SUB),
-        .in13(32'b0),
+        .in13(RESULT_ALU_SLT),
         .in14(32'b0),
-        .in15(32'b0),
+        .in15(RESULT_ALU_SLTU),
         .s(control),
         .out(result)
     );
@@ -132,9 +138,9 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in10(1'b0),
         .in11(1'b0),
         .in12(RESULT_SUB_OVERFLOW),
-        .in13(1'b0),
+        .in13(RESULT_SUB_OVERFLOW),
         .in14(1'b0),
-        .in15(1'b0),
+        .in15(RESULT_SUB_OVERFLOW),
         .s(control),
         .out(overflow)
     );
