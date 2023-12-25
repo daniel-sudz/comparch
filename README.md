@@ -2,6 +2,8 @@
 
 ## Components Checklist
 
+### ALU
+- [x] 32bit (structural with SLTU/overflow)
 
 ### Shifters
 - sll
