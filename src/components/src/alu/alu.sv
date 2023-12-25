@@ -71,26 +71,22 @@ module alu(a, b, control, result, overflow, zero, equal);
     logic [N-1:0] NO_OVERFLOW_RESULT_ALU_SRA;
     sra #(N) sra_alu_shifter(.in(a), .shamt(b[$clog2(N)-1:0]), .out(NO_OVERFLOW_RESULT_ALU_SRA));
     assign RESULT_ALU_SRA = NO_OVERFLOW_RESULT_ALU_SRA & (~shift_overflow_mask);
-    
-    /* ----- [ADD/SUB] Helper States  ----- */
-    logic both_in_negative;
-    assign both_in_negative = a[N-1] & b[N-1];
-
-    logic both_in_positive;
-    assign both_in_positive = (~a[N-1]) & (~b[N-1]);
-
-    logic both_in_diff;
-    assign both_in_diff = (~both_in_negative) & (~both_in_positive);
 
     /* ----- [ADD] Operation Result  ----- */
-    logic [N-1:0] NO_OVERFLOW_RESULT_ALU_ADD;
-    logic NO_OVERFLOW_ADD_CARY;
-    adder_n #(N) adder_n_alu_add(.a(a), .b(b), .c_in(1'b0), .c_out(NO_OVERFLOW_ADD_CARY), .sum(NO_OVERFLOW_RESULT_ALU_ADD));
+    logic alu_adder_overflow;
+    adder_n #(N) adder_n_alu_add(.a(a), .b(b), .c_in(1'b0), .c_out(alu_adder_overflow), .sum(RESULT_ALU_ADD));
+    
+    /* Overflow happens when a and b have the same sign which is different from the result sign */
+    assign RESULT_ADD_OVERFLOW = (~(a[N-1] ^ b[N-1])) & (a[N-1] ^ RESULT_ALU_ADD[N-1]);
 
-    assign RESULT_ALU_ADD = {
-        (both_in_negative) | (both_in_diff & NO_OVERFLOW_RESULT_ALU_ADD[N-1]),
-        NO_OVERFLOW_RESULT_ALU_ADD[N-2:0]
-    };
+    /* ----- [SUB] Operation Result  ----- */
+    logic alu_sub_overflow;
+    /* We account for 2's complement by inverting b and passing in 1 to the carry_in https://en.wikipedia.org/wiki/Two%27s_complement */
+    adder_n #(N) adder_n_alu_sub(.a(a), .b(~b), .c_in(1'b1), .c_out(alu_sub_overflow), .sum(RESULT_ALU_SUB));
+    
+    /* Overflow happens when a and b have the same sign which is different from the result sign */
+    assign RESULT_SUB_OVERFLOW = (~(a[N-1] ^ (~b[N-1]))) & (a[N-1] ^ RESULT_ALU_SUB[N-1]);
+    
 
     /* ----- [Equal] Operation Result   ----- */
     comparator_eq eqcmp(.a(a), .b(b), .out(equal));
@@ -113,7 +109,7 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in9(32'b0),
         .in10(32'b0),
         .in11(32'b0),
-        .in12(32'b0),
+        .in12(RESULT_ALU_SUB),
         .in13(32'b0),
         .in14(32'b0),
         .in15(32'b0),
@@ -131,11 +127,11 @@ module alu(a, b, control, result, overflow, zero, equal);
         .in5(1'b0),
         .in6(1'b0),
         .in7(1'b0),
-        .in8(1'b0),
+        .in8(RESULT_ADD_OVERFLOW),
         .in9(1'b0),
         .in10(1'b0),
         .in11(1'b0),
-        .in12(1'b0),
+        .in12(RESULT_SUB_OVERFLOW),
         .in13(1'b0),
         .in14(1'b0),
         .in15(1'b0),
