@@ -74,5 +74,14 @@ test_alu_provided: tests/provided/test_alu.sv src/**/*.sv
 
 test_alu_all: test_alu_provided
 
+# Test register_file
+test_register_file_our: tests/our/test_register_file.sv src/**/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
 
-all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all
+test_register_file_provided: tests/provided/test_register_file.sv src/**/*.sv
+	${IVERILOG} $^ -o $@.bin && ${VVP} $@.bin ${VVP_POST}
+
+test_register_file_all: test_register_file_our test_register_file_provided
+
+
+all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all test_register_file_all

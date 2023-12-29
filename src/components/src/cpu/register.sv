@@ -30,7 +30,7 @@ module register(clk, ena, rst, d, q);
         end
         else begin
             if (ena) begin
-            q <= d;
+                q <= d;
             end
         end
     end

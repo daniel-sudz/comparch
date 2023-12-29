@@ -88,11 +88,15 @@ module alu(a, b, control, result, overflow, zero, equal);
     assign RESULT_SUB_OVERFLOW = (~(a[N-1] ^ (~b[N-1]))) & (a[N-1] ^ RESULT_ALU_SUB[N-1]);
     
     /* ----- [SLT] Operation Result  ----- */
-    comparator_lt #(N) set_less_than_alu(.a(a), .b(b), .out(RESULT_ALU_SLT));
+    logic set_less_than_alu_intermediate;
+    comparator_lt #(N) set_less_than_alu(.a(a), .b(b), .out(set_less_than_alu_intermediate));
+    assign RESULT_ALU_SLT = {31'b0, set_less_than_alu_intermediate};
 
     /* ----- [SLTU] Operation Result  ----- */
-    comparator_lt #(N+1) set_less_than_unsigned_alu(.a({1'b0, a}), .b({1'b0, b}), .out(RESULT_ALU_SLTU));
-    
+    logic set_less_than_unsigned_alu_intermediate;
+    comparator_lt #(N+1) set_less_than_unsigned_alu(.a({1'b0, a}), .b({1'b0, b}), .out(set_less_than_unsigned_alu_intermediate));
+    assign RESULT_ALU_SLTU = {31'b0, set_less_than_unsigned_alu_intermediate};
+
 
     /* ----- [Equal] Operation Result   ----- */
     comparator_eq eqcmp(.a(a), .b(b), .out(equal));

@@ -28,7 +28,7 @@ module comparator_lt(a, b, out);
 
 
     /* ----- Design  ----- */
-    comparator_eq check_eq(.a(a), .b(b), .out(a_eq_b));
+    comparator_eq #(N) check_eq(.a(a), .b(b), .out(a_eq_b));
 
     /* Base case */
     assign b_already_bigger[N-1] = (~b[N-1] & a[N-1]);
