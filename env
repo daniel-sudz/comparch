@@ -25,5 +25,8 @@ function comparch(){
 	$CAFE_REPO_ROOT/tools/check_install
 }
 
+# when ubuntu craps out, this reboots everything with a sort-restart
+alias unfreeze="sudo service gdm restart"
+
 #comparch;
 
