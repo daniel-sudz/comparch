@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests/provided -Y.sv -I src/alu -I src/cpu -DSIMULATION
+IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests/provided -Y.sv -I src/alu -I src/cpu/types -DSIMULATION
 VVP=vvp
 VVP_POST=-fst
 WAVES=gtkwave --rcvar 'fontname_signals Monospace 20' --rcvar 'fontname_waves Monospace 20'
