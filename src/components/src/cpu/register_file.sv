@@ -64,7 +64,7 @@ module register_file(rst, clk, wr_ena, wr_addr, wr_data, rd_addr0, rd_data0, rd_
     always_comb rd_data1 = xn[rd_addr1];
 
 
-    function void print_state();
+    task print_state;
         $display("|---------------------------------------|");
         $display("| Register File State                   |");
         $display("|---------------------------------------|");
@@ -101,6 +101,6 @@ module register_file(rst, clk, wr_ena, wr_addr, wr_data, rd_addr0, rd_data0, rd_
         $display("| %12s = 0x%8h (%10d)|", "x30, t5", xn[30], xn[30]); 
         $display("| %12s = 0x%8h (%10d)|", "x31, t6", xn[31], xn[31]); 
         $display("|---------------------------------------|");
-    endfunction // print_state
+    endtask // print_state
 
 endmodule
