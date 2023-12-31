@@ -83,5 +83,20 @@ test_register_file_provided: tests/provided/test_register_file.sv src/**/*.sv
 
 test_register_file_all: test_register_file_our test_register_file_provided
 
+# Assembles .s (human readable) files into .memh (verilog readable binary) files.
+%.memh : %.s ../tools/assembler.py ../tools/rv32i.py
+	../tools/assembler.py $< -o $@
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Instruction Type Tests
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
+	${IVERILOG} -y ./rv32 $^ -s $@ -o $@
+
+test_rv32_itypes: rv32_simulator ../asm/itypes.memh
+	./rv32_simulator +initial_memory=../asm/itypes.memh ${VVP_POST}
+
+test_rv32_irtypes: rv32_simulator ../asm/irtypes.memh
+	./rv32_simulator +initial_memory=../asm/irtypes.memh ${VVP_POST}
 
 all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all test_register_file_all
