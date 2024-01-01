@@ -66,7 +66,7 @@ module register_file(rst, clk, wr_ena, wr_addr, wr_data, rd_addr0, rd_data0, rd_
 
     task print_state;
         $display("|---------------------------------------|");
-        $display("| Register File State                   |");
+        $display("| Register File State :)                |");
         $display("|---------------------------------------|");
         $display("| %12s = 0x%8h (%10d)|", "x00, zero", xn[0], xn[0]);
         $display("| %12s = 0x%8h (%10d)|", "x01, ra", xn[1], xn[1]);
