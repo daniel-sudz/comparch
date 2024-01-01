@@ -13,8 +13,11 @@ module rv32i_multicycle_core(
     mem_access, mem_exception,
     PC, instructions_completed, instruction_done
     );
+    
+    enum logic [1:0] {S_FETCH} state;
 
-    parameter PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
+    parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
+
 
     // Standard control signals.
     input  wire clk, rst, ena; // <- worry about implementing the ena signal last.
