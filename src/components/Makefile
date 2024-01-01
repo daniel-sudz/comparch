@@ -1,8 +1,9 @@
 SHELL=/bin/bash
-IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests/provided -Y.sv -I src/alu -DSIMULATION
+IVERILOG=iverilog -g2012 -Wall -Wno-sensitivity-entire-vector -Wno-sensitivity-entire-array -y./ -y./tests/provided -Y.sv -I src/alu -I src/cpu/types -DSIMULATION
 VVP=vvp
 VVP_POST=-fst
 WAVES=gtkwave --rcvar 'fontname_signals Monospace 20' --rcvar 'fontname_waves Monospace 20'
+TOOLS_ROOT=../../olin-cafe-f23/tools
 
 # Some Makefile magic. Look it up if you are curious about build systems!
 .PHONY: clean
@@ -83,5 +84,23 @@ test_register_file_provided: tests/provided/test_register_file.sv src/**/*.sv
 
 test_register_file_all: test_register_file_our test_register_file_provided
 
+# Assembles .s (human readable) files into .memh (Verilog readable binary) files.
+%.memh: ../asm/%.s $(TOOLS_ROOT)/assembler.py $(TOOLS_ROOT)/rv32i.py
+	$(TOOLS_ROOT)/assembler.py $< -o ../asm/out/$@
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Instruction Type Tests
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+r32_assemble: foo.memh
+
+rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
+	${IVERILOG} -y ./rv32 $^ -s $@ -o $@
+
+test_rv32_itypes: rv32_simulator itypes.memh
+	./rv32_simulator +initial_memory=../asm/out/itypes.memh ${VVP_POST}
+
+test_rv32_irtypes: rv32_simulator irtypes.memh
+	./rv32_simulator +initial_memory=../asm/out/irtypes.memh ${VVP_POST}
 
 all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all test_register_file_all
