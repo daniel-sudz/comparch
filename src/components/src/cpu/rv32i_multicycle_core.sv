@@ -14,31 +14,30 @@ module rv32i_multicycle_core(
     PC, instructions_completed, instruction_done
     );
     
-    enum logic [1:0] {S_FETCH} state;
+    enum logic [1:0] {S_FETCH, S_DECODE} state;
 
     parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
 
 
-    // Standard control signals.
+    /* ---------------------- Standard Control Signals ---------------------- */
     input  wire clk, rst, ena; // <- worry about implementing the ena signal last.
     output logic instruction_done; // Should be high for one clock cycle when finishing an instruction (e.g. during the writeback state).
 
-    // Memory interface.
+    /* ---------------------- Memory Interface ---------------------- */
     output logic [31:0] mem_addr, mem_wr_data;
     input   wire [31:0] mem_rd_data;
     output mem_access_t mem_access;
     input mem_exception_mask_t mem_exception;
     output logic mem_wr_ena;
 
-    // Program Counter
+    /* ---------------------- Program Counter ---------------------- */
     output wire [31:0] PC;
     output logic [31:0] instructions_completed; // TODO(student) - increment this by one whenever an instruction is complete.
     wire [31:0] PC_old;
     logic PC_ena, PC_old_ena;
     logic [31:0] PC_next;
 
-    // Control Signals
-    // Decoder
+    /* ---------------------- Control Signals [Decoder] ---------------------- */
     logic [6:0] op;
     logic [2:0] funct3;
     logic [6:0] funct7;
@@ -46,18 +45,14 @@ module rv32i_multicycle_core(
     enum logic [2:0] {IMM_SRC_ITYPE, IMM_SRC_STYPE, IMM_SRC_BTYPE, IMM_SRC_JTYPE, IMM_SRC_UTYPE} immediate_src;
     logic [31:0] extended_immediate;
 
-    // R-file Control Signals
+    /* ---------------------- Control Signals [R-file] ---------------------- */
     logic [4:0] rd, rs1, rs2;
     wire [31:0] reg_data1, reg_data2;
     logic reg_write;
     logic [31:0] rfile_wr_data;
     wire [31:0] reg_A, reg_B;
 
-    // ALU Control Signals
-    enum logic [1:0] {ALU_SRC_A_PC, ALU_SRC_A_RF, ALU_SRC_A_OLD_PC, ALU_SRC_A_ZERO} 
-    alu_src_a;
-    enum logic [1:0] {ALU_SRC_B_RF, ALU_SRC_B_IMM, ALU_SRC_B_4, ALU_SRC_B_ZERO} 
-    alu_src_b;
+    /* ---------------------- Control Signals [ALU] ---------------------- */
     logic [31:0] src_a, src_b;
     wire [31:0] alu_result;
     alu_control_t alu_control, ri_alu_control;
@@ -65,9 +60,8 @@ module rv32i_multicycle_core(
     wire zero;
     wire equal;
 
-    // Non-architectural Register Signals
-    logic IR_write;
-    wire [31:0] IR; // Instruction Register (current instruction)
+
+   /* ---------------------- Non-Architectural Register Signals ---------------------- */
     logic ALU_ena;
     wire [31:0] alu_last; // Not a descriptive name, but this is what it's called in the text.
     logic mem_data_ena;
@@ -76,12 +70,19 @@ module rv32i_multicycle_core(
     enum logic [1:0] {RESULT_SRC_ALU, RESULT_SRC_MEM_DATA, RESULT_SRC_ALU_LAST} result_src; 
     logic [31:0] result;
 
-    // Program Counter Register
+    /* ---------------------- Instruction Register ---------------------- */
+    logic [31:0] IR, IR_next;
+    logic IR_write;
+    register #(.N(32), .RESET_VALUE(32'b0)) IR_REGISTER (
+    .clk(clk), .rst(rst), .ena(IR_write), .d(IR_next), .q(IR)
+    );
+
+    /* ---------------------- Program Counter Register ---------------------- */
     register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_REGISTER (
     .clk(clk), .rst(rst), .ena(PC_ena), .d(PC_next), .q(PC)
     );
 
-    // Register file
+    /* ---------------------- Register File ---------------------- */
     register_file REGISTER_FILE(
     .clk(clk), .rst(rst),
     .wr_ena(reg_write), .wr_addr(rd), .wr_data(rfile_wr_data),
@@ -98,12 +99,62 @@ module rv32i_multicycle_core(
     register #(.N(32)) REGISTER_B (.clk(clk), .rst(rst), .ena(1'b1), .d(reg_data2), .q(reg_B));
     always_comb mem_wr_data = reg_B; // RISC-V always stores data from this location.
 
-    // ALU and related control signals - use the behavioral one if you need to.
+    /* ---------------------- ALU ---------------------- */
     alu ALU (
     .a(src_a), .b(src_b), .result(alu_result),
     .control(alu_control),
     .overflow(overflow), .zero(zero), .equal(equal)
     );
+
+
+    /* ---------------------- Memory Read Multiplexor ---------------------- */
+    always_comb begin : multiplexor_mem_read
+        case(state)
+            S_FETCH: begin
+                mem_access = MEM_ACCESS_BYTE;
+                mem_addr = PC;
+            end
+        endcase
+    end
+
+    /* ---------------------- Instruction Register Multiplexor ---------------------- */
+    always_comb IR_write = (state == S_FETCH) ? 1 : 0;
+    always_comb IR_next = mem_rd_data;
+
+
+    /* ---------------------- ALU Control Multiplexor ---------------------- */
+    always_comb begin : multiplexor_alu_control 
+        case(state)
+            /* In the fetch state, the ALU is used to increment the PC by 4 */
+            S_FETCH: begin
+                alu_control = ALU_ADD;
+                src_a = PC;
+                src_b = 32'd4;
+            end 
+        endcase
+    end
+
+    /* ---------------------- Program Counter Multiplexor ---------------------- */
+    always_comb begin : multiplexor_pc
+        case(state)
+            S_FETCH: begin
+                PC_next = alu_result;
+            end 
+        endcase
+    end
+
+
+    /* ---------------------- CPU Controller State Machine ---------------------- */
+    always_ff @(posedge clk) begin : rv32i_multicycle_core
+        if(rst) begin
+            state <= S_FETCH;
+        end else begin
+            case(state) 
+                S_FETCH: state <= S_DECODE;
+            endcase 
+        end
+
+    end
 
 
 endmodule
