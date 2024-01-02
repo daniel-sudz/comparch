@@ -37,16 +37,38 @@ module rv32i_multicycle_core(
     logic PC_ena, PC_old_ena;
     logic [31:0] PC_next;
 
-    /* ---------------------- Control Signals [Decoder] ---------------------- */
+    /* ---------------------- Instruction Decoder ---------------------- */
     logic [6:0] op;
     logic [2:0] funct3;
     logic [6:0] funct7;
-    logic rtype, itype, ltype, stype, btype, jtype;
-    enum logic [2:0] {IMM_SRC_ITYPE, IMM_SRC_STYPE, IMM_SRC_BTYPE, IMM_SRC_JTYPE, IMM_SRC_UTYPE} immediate_src;
+    logic [4:0] rd, rs1, rs2;
     logic [31:0] extended_immediate;
 
+    logic rtype, itype, ltype, stype, btype, jtype;
+
+    always_comb op = IR[6:0];
+    always_comb funct3 = IR[14:12];
+    always_comb rs1 = IR[19:15];
+    always_comb rs2 = IR[24:20];
+
+    always_comb begin : instruction_type_decoder
+        if(op == 6'd3 || op == 6'd19) begin
+            itype = 1;
+            rtype = 0;
+        end else if(op == 6'd51) begin
+            itype = 0;
+            rtype = 1;
+        end
+    end
+
+    always_comb begin : extended_immediate_decoder
+        if(itype) begin
+            extended_immediate = {{20{IR[31]}}, IR[31:25]};
+        end
+    end
+
+
     /* ---------------------- Control Signals [R-file] ---------------------- */
-    logic [4:0] rd, rs1, rs2;
     wire [31:0] reg_data1, reg_data2;
     logic reg_write;
     logic [31:0] rfile_wr_data;

@@ -95,12 +95,12 @@ test_register_file_all: test_register_file_our test_register_file_provided
 r32_assemble: foo.memh
 
 rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
-	${IVERILOG} -y ./rv32 $^ -s $@ -o $@
+	${IVERILOG} -y ./rv32 $^ -s $@ -o $@.bin
 
 test_rv32_itypes: rv32_simulator itypes.memh
-	./rv32_simulator +initial_memory=../asm/out/itypes.memh ${VVP_POST}
+	./rv32_simulator.bin +initial_memory=../asm/out/itypes.memh ${VVP_POST}
 
 test_rv32_irtypes: rv32_simulator irtypes.memh
-	./rv32_simulator +initial_memory=../asm/out/irtypes.memh ${VVP_POST}
+	./rv32_simulator.bin +initial_memory=../asm/out/irtypes.memh ${VVP_POST}
 
 all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all test_register_file_all
