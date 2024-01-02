@@ -14,7 +14,7 @@ module rv32i_multicycle_core(
     PC, instructions_completed, instruction_done
     );
     
-    enum logic [1:0] {S_FETCH, S_DECODE} state;
+    enum logic [2:0] {S_FETCH, S_DECODE, S_MEMADR, S_MEMREAD, S_MEMWB} state;
 
     parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
 
@@ -92,6 +92,12 @@ module rv32i_multicycle_core(
     enum logic [1:0] {RESULT_SRC_ALU, RESULT_SRC_MEM_DATA, RESULT_SRC_ALU_LAST} result_src; 
     logic [31:0] result;
 
+    register #(.N(32), .RESET_VALUE(32'b0)) ALU_RESULT_REGISTER (
+    .clk(clk), .rst(rst), .ena(ALU_ena), .d(alu_result), .q(alu_last)
+    );
+
+    always_comb ALU_ena = 1;
+
     /* ---------------------- Instruction Register ---------------------- */
     logic [31:0] IR, IR_next;
     logic IR_write;
@@ -153,6 +159,14 @@ module rv32i_multicycle_core(
                 src_a = PC;
                 src_b = 32'd4;
             end 
+            S_MEMADR: begin
+                /* Case for load word (lw) instruction */
+                if((IR == 6'd3) && (funct3 == 3'b010)) begin
+                    alu_control = ALU_ADD;
+                    src_a = rs1;
+                    src_b = extended_immediate;
+                end
+            end
         endcase
     end
 
@@ -173,6 +187,10 @@ module rv32i_multicycle_core(
         end else begin
             case(state) 
                 S_FETCH: state <= S_DECODE;
+                S_DECODE: state <= S_MEMADR;
+                S_MEMADR: state <= S_MEMREAD;
+                S_MEMREAD: state <= S_MEMWB;
+                S_MEMWB: state <= S_FETCH;
             endcase 
         end
 
