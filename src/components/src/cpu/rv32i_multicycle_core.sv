@@ -14,7 +14,7 @@ module rv32i_multicycle_core(
     PC, instructions_completed, instruction_done
     );
     
-    enum logic [2:0] {S_FETCH, S_DECODE, S_MEMADR, S_MEMREAD, S_MEMWB} state;
+    enum logic [3:0] {S_FETCH, S_DECODE, S_MEMADR, S_MEMREAD, S_MEMWB, S_EXECUTE_R, S_ALUWB} state;
 
     parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
 
@@ -34,7 +34,7 @@ module rv32i_multicycle_core(
     output wire [31:0] PC;
     output logic [31:0] instructions_completed; // TODO(student) - increment this by one whenever an instruction is complete.
     wire [31:0] PC_old;
-    logic PC_ena, PC_old_ena;
+    logic PC_next_ena, PC_ena, PC_old_ena;
     logic [31:0] PC_next;
 
     /* ---------------------- Instruction Decoder ---------------------- */
@@ -71,7 +71,6 @@ module rv32i_multicycle_core(
     /* ---------------------- Control Signals [R-file] ---------------------- */
     wire [31:0] reg_data1, reg_data2;
     logic reg_write;
-    logic [31:0] rfile_wr_data;
     wire [31:0] reg_A, reg_B;
 
     /* ---------------------- Control Signals [ALU] ---------------------- */
@@ -135,6 +134,9 @@ module rv32i_multicycle_core(
     register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_REGISTER (
     .clk(clk), .rst(rst), .ena(PC_ena), .d(PC_next), .q(PC)
     );
+    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_NEXT_REGISTER (
+    .clk(clk), .rst(rst), .ena(PC_next_ena), .d(alu_result), .q(PC_next)
+    );
     register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_OLD_REGISTER (
     .clk(clk), .rst(rst), .ena(PC_old_ena), .d(PC), .q(PC_old)
     );
@@ -142,7 +144,7 @@ module rv32i_multicycle_core(
     /* ---------------------- Register File ---------------------- */
     register_file REGISTER_FILE(
     .clk(clk), .rst(rst),
-    .wr_ena(reg_write), .wr_addr(rd), .wr_data(rfile_wr_data),
+    .wr_ena(reg_write), .wr_addr(rd), .wr_data(result),
     .rd_addr0(rs1), .rd_addr1(rs2),
     .rd_data0(reg_data1), .rd_data1(reg_data2)
     );
@@ -184,17 +186,8 @@ module rv32i_multicycle_core(
         endcase
     end
 
-    /* ---------------------- Program Counter Multiplexor ---------------------- */
-    always_comb begin : multiplexor_pc
-        case(state)
-            S_FETCH: begin
-                PC_next = alu_result;
-            end 
-        endcase
-    end
-
     /* ---------------------- Datapath ---------------------- */ 
-    always_comb begin : datapath 
+    always_comb begin : datapath_load
         case(state) 
             S_FETCH: begin 
                 // fetch the PC from memory
@@ -203,11 +196,11 @@ module rv32i_multicycle_core(
                 IR_write = 1;
                 // save old PC
                 PC_old_ena = 1;
-                // compute PC + 4 into ALU_Last
+                // compute (PC + 4) into PC_next
                 alu_control = ALU_ADD;
                 alu_src_a = ALU_SRC_A_PC;
                 alu_src_b = ALU_SRC_B_4;
-                alu_last_ena = 1;
+                PC_next_ena = 1;
             end
             S_DECODE: begin
                 // no signals to generate in decode phase
@@ -231,8 +224,37 @@ module rv32i_multicycle_core(
             S_MEMWB: begin
                 /* LOAD INSTRUCTION write back to RF */
                 if(op == 32'd3) begin
+                    result_src = RESULT_SRC_MEM_DATA;
                     reg_write = 1;
                 end
+
+                // move PC up to PC_next
+                PC_ena = 1;
+            end
+        endcase 
+    end
+
+    always_comb begin : datapath_r
+        case(state)
+            S_EXECUTE_R: begin
+                alu_src_a = ALU_SRC_A_RF;
+                alu_src_b = ALU_SRC_B_RF;
+                alu_last_ena = 1;
+                
+                if((funct3 == 3'b000) && (funct7 == 7'b0000000))        alu_control = ALU_ADD;
+                else if((funct3 == 3'b000) && (funct7 == 7'b0100000))   alu_control = ALU_SUB;
+                else if((funct3 == 3'b001) && (funct7 == 7'b0000000))   alu_control = ALU_SLL;
+                else if((funct3 == 3'b010) && (funct7 == 7'b0000000))   alu_control = ALU_SLT;
+                else if((funct3 == 3'b011) && (funct7 == 7'b0000000))   alu_control = ALU_SLTU;
+                else if((funct3 == 3'b100) && (funct7 == 7'b0000000))   alu_control = ALU_XOR;
+                else if((funct3 == 3'b101) && (funct7 == 7'b0000000))   alu_control = ALU_SRL;
+                else if((funct3 == 3'b101) && (funct7 == 7'b0100000))   alu_control = ALU_SRA;
+                else if((funct3 == 3'b110) && (funct7 == 7'b0000000))   alu_control = ALU_OR;
+                else if((funct3 == 3'b111) && (funct7 == 7'b0000000))   alu_control = ALU_AND;
+            end
+            S_ALUWB: begin
+                result_src = RESULT_SRC_ALU_LAST;
+                reg_write = 1;
             end
         endcase 
     end
@@ -244,7 +266,18 @@ module rv32i_multicycle_core(
         end else begin
             case(state) 
                 S_FETCH: state <= S_DECODE;
-                S_DECODE: state <= S_MEMADR;
+                S_DECODE: begin
+                    /* Load or store instructions */
+                    if((op == 6'b0000011) || (op == 6'b0100011)) begin
+                        state <= S_MEMADR;
+                    end 
+                    /* R-type instructions */
+                    else if(op == 6'b0110011) begin
+                        state <= S_EXECUTE_R;
+                    end
+                end
+                S_EXECUTE_R: state <= S_ALUWB;
+                S_ALUWB: state <= S_FETCH;
                 S_MEMADR: state <= S_MEMREAD;
                 S_MEMREAD: state <= S_MEMWB;
                 S_MEMWB: state <= S_FETCH;
