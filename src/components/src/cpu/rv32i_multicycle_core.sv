@@ -98,9 +98,6 @@ module rv32i_multicycle_core(
     register #(.N(32), .RESET_VALUE(32'b0)) ALU_RESULT_REGISTER (
     .clk(clk), .rst(rst), .ena(ALU_ena), .d(alu_result), .q(alu_last)
     );
-
-    assign ALU_ena = 1;
-
     
 
     /* ---------------------- Result SRC Signals ---------------------- */
@@ -197,12 +194,20 @@ module rv32i_multicycle_core(
     always_comb begin : datapath 
         case(state) 
             S_FETCH: begin 
+                // fetch the PC from memory
                 mem_src = MEM_SRC_PC;
+                // write PC to IR
                 IR_write = 1;
-                PC_old_ena = 0;
+                // save old PC
+                PC_old_ena = 1;
+                // compute PC + 4 into ALU_Last
+                alu_src_a = ALU_SRC_A_PC;
+                alu_src_b = ALU_SRC_B_4;
+                ALU_ena = 1;
+
             end
             S_DECODE: begin
-                
+                // no signals to generate in decode phase
             end
             S_MEMADR: begin
                 
