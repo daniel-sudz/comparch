@@ -13,8 +13,13 @@ module rv32i_multicycle_core(
     mem_access, mem_exception,
     PC, instructions_completed, instruction_done
     );
+
+    `define OP_IMMEDIATE_I_EXECUTE 6'b0010011
+    `define OP_IMMEDIATE_I_LOAD 6'b0000011
+
+    `define OP_R_EXECUTE 6'b0110011
     
-    enum logic [3:0] {S_FETCH, S_DECODE, S_MEMADR, S_MEMREAD, S_MEMWB, S_EXECUTE_R, S_ALUWB} state;
+    enum logic [3:0] {S_FETCH, S_DECODE, S_MEMADR, S_MEMREAD, S_MEMWB, S_EXECUTE_RI, S_ALUWB} state;
 
     parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
 
@@ -44,21 +49,20 @@ module rv32i_multicycle_core(
     logic [4:0] rd, rs1, rs2;
     logic [31:0] extended_immediate;
 
-    logic rtype, itype, ltype, stype, btype, jtype;
+    enum logic[3:0] {rtype, itype, ltype, stype, btype, jtype} instruction_type;
 
     always_comb op = IR[6:0];
     always_comb funct3 = IR[14:12];
+    always_comb funct7 = IR[31:25];
     always_comb rs1 = IR[19:15];
     always_comb rs2 = IR[24:20];
 
     always_comb begin : instruction_type_decoder
-        if(op == 6'd3 || op == 6'd19) begin
-            itype = 1;
-            rtype = 0;
-        end else if(op == 6'd51) begin
-            itype = 0;
-            rtype = 1;
-        end
+        case(op) 
+            `OP_IMMEDIATE_I_LOAD: instruction_type = itype;
+            `OP_IMMEDIATE_I_EXECUTE: instruction_type = itype;
+            `OP_R_EXECUTE: instruction_type = rtype;
+        endcase
     end
 
     always_comb begin : extended_immediate_decoder
@@ -236,21 +240,36 @@ module rv32i_multicycle_core(
 
     always_comb begin : datapath_r
         case(state)
-            S_EXECUTE_R: begin
+            S_EXECUTE_RI: begin
                 alu_src_a = ALU_SRC_A_RF;
-                alu_src_b = ALU_SRC_B_RF;
+                alu_src_b = (op == `OP_IMMEDIATE_I_EXECUTE) ? extended_immediate : ALU_SRC_B_RF;
                 alu_last_ena = 1;
+
+                case({funct3, funct7, op}) 
+                    /* I-type instructions below */
+                    {3'b000, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_ADD;
+                    {3'b001, 7'b0000000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLL;
+                    {3'b010, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLT;
+                    {3'b011, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLTU;
+                    {3'b100, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_XOR;
+                    {3'b101, 7'b0000000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SRL;
+                    {3'b101, 7'b0100000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SRA;
+                    {3'b110, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_OR;
+                    {3'b111, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_AND;
+
+                    /* R-type instruction below */
+                    {3'b000, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_ADD;
+                    {3'b000, 7'b0100000, `OP_R_EXECUTE}: alu_control = ALU_SUB;
+                    {3'b001, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SLL;
+                    {3'b010, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SLT;
+                    {3'b011, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SLTU;
+                    {3'b100, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_XOR;
+                    {3'b101, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SRL;
+                    {3'b101, 7'b0100000, `OP_R_EXECUTE}: alu_control = ALU_SRA;
+                    {3'b110, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_OR;
+                    {3'b111, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_AND;
+                endcase
                 
-                if((funct3 == 3'b000) && (funct7 == 7'b0000000))        alu_control = ALU_ADD;
-                else if((funct3 == 3'b000) && (funct7 == 7'b0100000))   alu_control = ALU_SUB;
-                else if((funct3 == 3'b001) && (funct7 == 7'b0000000))   alu_control = ALU_SLL;
-                else if((funct3 == 3'b010) && (funct7 == 7'b0000000))   alu_control = ALU_SLT;
-                else if((funct3 == 3'b011) && (funct7 == 7'b0000000))   alu_control = ALU_SLTU;
-                else if((funct3 == 3'b100) && (funct7 == 7'b0000000))   alu_control = ALU_XOR;
-                else if((funct3 == 3'b101) && (funct7 == 7'b0000000))   alu_control = ALU_SRL;
-                else if((funct3 == 3'b101) && (funct7 == 7'b0100000))   alu_control = ALU_SRA;
-                else if((funct3 == 3'b110) && (funct7 == 7'b0000000))   alu_control = ALU_OR;
-                else if((funct3 == 3'b111) && (funct7 == 7'b0000000))   alu_control = ALU_AND;
             end
             S_ALUWB: begin
                 result_src = RESULT_SRC_ALU_LAST;
@@ -271,12 +290,12 @@ module rv32i_multicycle_core(
                     if((op == 6'b0000011) || (op == 6'b0100011)) begin
                         state <= S_MEMADR;
                     end 
-                    /* R-type instructions */
-                    else if(op == 6'b0110011) begin
-                        state <= S_EXECUTE_R;
+                    /* RI-type instructions */
+                    else if(op == 6'b0110011 || (op == 6'b0010011)) begin
+                        state <= S_EXECUTE_RI;
                     end
                 end
-                S_EXECUTE_R: state <= S_ALUWB;
+                S_EXECUTE_RI: state <= S_ALUWB;
                 S_ALUWB: state <= S_FETCH;
                 S_MEMADR: state <= S_MEMREAD;
                 S_MEMREAD: state <= S_MEMWB;
