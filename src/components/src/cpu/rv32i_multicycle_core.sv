@@ -153,7 +153,7 @@ module rv32i_multicycle_core(
     .rd_data0(reg_data1), .rd_data1(reg_data2)
     );
 
-    task print_rfile();
+    task print_rfile;
         REGISTER_FILE.print_state();
     endtask
 
@@ -242,7 +242,10 @@ module rv32i_multicycle_core(
         case(state)
             S_EXECUTE_RI: begin
                 alu_src_a = ALU_SRC_A_RF;
-                alu_src_b = (op == `OP_IMMEDIATE_I_EXECUTE) ? extended_immediate : ALU_SRC_B_RF;
+                case(op)
+                    `OP_IMMEDIATE_I_EXECUTE: alu_src_b = ALU_SRC_B_IMM;
+                    default : alu_src_b = ALU_SRC_B_RF;
+                endcase 
                 alu_last_ena = 1;
 
                 case({funct3, funct7, op}) 
