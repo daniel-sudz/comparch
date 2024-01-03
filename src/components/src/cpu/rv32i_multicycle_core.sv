@@ -66,9 +66,9 @@ module rv32i_multicycle_core(
     end
 
     always_comb begin : extended_immediate_decoder
-        if(itype) begin
-            extended_immediate = {{20{IR[31]}}, IR[31:25]};
-        end
+        case(op) 
+            itype: extended_immediate = {{20{IR[31]}}, IR[31:25]};
+        endcase
     end
 
 
@@ -98,7 +98,6 @@ module rv32i_multicycle_core(
     enum logic [2:0] {MEM_SRC_PC, MEM_SRC_ALU_LAST, MEM_SRC_RESULT} mem_src;
 
     always_comb begin : mem_src_signals
-        mem_access = MEM_ACCESS_BYTE;
         case(mem_src)
             MEM_SRC_PC: mem_addr = PC;
             MEM_SRC_ALU_LAST: mem_addr = alu_last;
@@ -196,6 +195,8 @@ module rv32i_multicycle_core(
             S_FETCH: begin 
                 // fetch the PC from memory
                 mem_src = MEM_SRC_PC;
+                mem_access = MEM_ACCESS_WORD;
+
                 // write PC to IR
                 IR_write = 1;
                 // save old PC
@@ -277,6 +278,8 @@ module rv32i_multicycle_core(
             S_ALUWB: begin
                 result_src = RESULT_SRC_ALU_LAST;
                 reg_write = 1;
+                // move PC up to PC_next
+                PC_ena = 1;
             end
         endcase 
     end
