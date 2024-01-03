@@ -88,15 +88,27 @@ module rv32i_multicycle_core(
 
 
    /* ---------------------- Non-Architectural Register Signals ---------------------- */
-    logic ALU_ena;
+    logic alu_last_ena;
     wire [31:0] alu_last; // Not a descriptive name, but this is what it's called in the text.
     logic mem_data_ena;
     wire [31:0] mem_data;
-    enum logic {MEM_SRC_PC, MEM_SRC_RESULT} mem_src;
+    enum logic [2:0] {MEM_SRC_PC, MEM_SRC_ALU_LAST, MEM_SRC_RESULT} mem_src;
 
+    always_comb begin : mem_src_signals
+        mem_access = MEM_ACCESS_BYTE;
+        case(mem_src)
+            MEM_SRC_PC: mem_addr = PC;
+            MEM_SRC_ALU_LAST: mem_addr = alu_last;
+        endcase
+    end
+    
 
     register #(.N(32), .RESET_VALUE(32'b0)) ALU_RESULT_REGISTER (
-    .clk(clk), .rst(rst), .ena(ALU_ena), .d(alu_result), .q(alu_last)
+    .clk(clk), .rst(rst), .ena(alu_last_ena), .d(alu_result), .q(alu_last)
+    );
+
+    register #(.N(32), .RESET_VALUE(32'b0)) MEM_DATA_REGISTER (
+    .clk(clk), .rst(rst), .ena(mem_data_ena), .d(mem_rd_data), .q(mem_data)
     );
     
 
@@ -107,12 +119,10 @@ module rv32i_multicycle_core(
     always_comb begin : result_signals
         case(result_src)
             RESULT_SRC_ALU: result = alu_result;
-            RESULT_SRC_MEM_DATA: result = mem_rd_data;
+            RESULT_SRC_MEM_DATA: result = mem_data;
             RESULT_SRC_ALU_LAST: result = alu_last;
         endcase
     end
-
-    
 
     /* ---------------------- Instruction Register ---------------------- */
     logic [31:0] IR, IR_next;
@@ -154,13 +164,6 @@ module rv32i_multicycle_core(
     .overflow(overflow), .zero(zero), .equal(equal)
     );
 
-
-    /* ---------------------- Memory Read Multiplexor ---------------------- */
-    always_comb begin : multiplexor_mem_read
-        mem_addr = (mem_src == MEM_SRC_PC) ? PC : result;
-        mem_access = MEM_ACCESS_BYTE;
-    end
-
     /* ---------------------- Instruction Register Multiplexor ---------------------- */
     always_comb IR_next = mem_rd_data;
      
@@ -175,7 +178,7 @@ module rv32i_multicycle_core(
         endcase
         case(alu_src_b) 
             ALU_SRC_B_RF: src_b = reg_B;
-            ALU_SRC_B_IMM: src_b = 0; // todo
+            ALU_SRC_B_IMM: src_b = extended_immediate;
             ALU_SRC_B_4: src_b = 32'd4;
             ALU_SRC_B_ZERO: src_b = 0;
         endcase
@@ -201,22 +204,35 @@ module rv32i_multicycle_core(
                 // save old PC
                 PC_old_ena = 1;
                 // compute PC + 4 into ALU_Last
+                alu_control = ALU_ADD;
                 alu_src_a = ALU_SRC_A_PC;
                 alu_src_b = ALU_SRC_B_4;
-                ALU_ena = 1;
-
+                alu_last_ena = 1;
             end
             S_DECODE: begin
                 // no signals to generate in decode phase
             end
             S_MEMADR: begin
-                
+                /* LOAD INSTRUCTION compute offset */
+                if(op == 32'd3) begin
+                    alu_control = ALU_ADD;
+                    alu_src_a = ALU_SRC_A_RF;
+                    alu_src_b = ALU_SRC_B_IMM;
+                    alu_last_ena = 1;
+                end
             end
             S_MEMREAD: begin
-                
+                 /* LOAD INSTRUCTION read from mem */
+                 if(op == 32'd3) begin
+                    mem_src = MEM_SRC_ALU_LAST;
+                    mem_data_ena = 1;
+                 end
             end
             S_MEMWB: begin
-                
+                /* LOAD INSTRUCTION write back to RF */
+                if(op == 32'd3) begin
+                    reg_write = 1;
+                end
             end
         endcase 
     end
