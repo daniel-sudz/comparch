@@ -66,8 +66,8 @@ module rv32i_multicycle_core(
     end
 
     always_comb begin : extended_immediate_decoder
-        case(op) 
-            itype: extended_immediate = {{20{IR[31]}}, IR[31:25]};
+        case(instruction_type) 
+            itype: extended_immediate = {{20{IR[31]}}, IR[31:20]};
         endcase
     end
 
