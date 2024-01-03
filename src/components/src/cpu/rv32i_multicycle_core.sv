@@ -75,6 +75,10 @@ module rv32i_multicycle_core(
     wire [31:0] reg_A, reg_B;
 
     /* ---------------------- Control Signals [ALU] ---------------------- */
+    enum logic [1:0] {ALU_SRC_A_PC, ALU_SRC_A_RF, ALU_SRC_A_OLD_PC, ALU_SRC_A_ZERO} 
+    alu_src_a;
+    enum logic [1:0] {ALU_SRC_B_RF, ALU_SRC_B_IMM, ALU_SRC_B_4, ALU_SRC_B_ZERO} 
+    alu_src_b;
     logic [31:0] src_a, src_b;
     wire [31:0] alu_result;
     alu_control_t alu_control, ri_alu_control;
@@ -89,14 +93,29 @@ module rv32i_multicycle_core(
     logic mem_data_ena;
     wire [31:0] mem_data;
     enum logic {MEM_SRC_PC, MEM_SRC_RESULT} mem_src;
-    enum logic [1:0] {RESULT_SRC_ALU, RESULT_SRC_MEM_DATA, RESULT_SRC_ALU_LAST} result_src; 
-    logic [31:0] result;
+
 
     register #(.N(32), .RESET_VALUE(32'b0)) ALU_RESULT_REGISTER (
     .clk(clk), .rst(rst), .ena(ALU_ena), .d(alu_result), .q(alu_last)
     );
 
-    always_comb ALU_ena = 1;
+    assign ALU_ena = 1;
+
+    
+
+    /* ---------------------- Result SRC Signals ---------------------- */
+    enum logic [1:0] {RESULT_SRC_ALU, RESULT_SRC_MEM_DATA, RESULT_SRC_ALU_LAST} result_src; 
+    logic [31:0] result;
+
+    always_comb begin : result_signals
+        case(result_src)
+            RESULT_SRC_ALU: result = alu_result;
+            RESULT_SRC_MEM_DATA: result = mem_rd_data;
+            RESULT_SRC_ALU_LAST: result = alu_last;
+        endcase
+    end
+
+    
 
     /* ---------------------- Instruction Register ---------------------- */
     logic [31:0] IR, IR_next;
@@ -108,6 +127,9 @@ module rv32i_multicycle_core(
     /* ---------------------- Program Counter Register ---------------------- */
     register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_REGISTER (
     .clk(clk), .rst(rst), .ena(PC_ena), .d(PC_next), .q(PC)
+    );
+    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_OLD_REGISTER (
+    .clk(clk), .rst(rst), .ena(PC_old_ena), .d(PC), .q(PC_old)
     );
 
     /* ---------------------- Register File ---------------------- */
@@ -123,6 +145,7 @@ module rv32i_multicycle_core(
     endtask
 
     // Non-architecture register: save register read data for future cycles.
+
     register #(.N(32)) REGISTER_A (.clk(clk), .rst(rst), .ena(1'b1), .d(reg_data1), .q(reg_A));
     register #(.N(32)) REGISTER_B (.clk(clk), .rst(rst), .ena(1'b1), .d(reg_data2), .q(reg_B));
     always_comb mem_wr_data = reg_B; // RISC-V always stores data from this location.
@@ -137,36 +160,27 @@ module rv32i_multicycle_core(
 
     /* ---------------------- Memory Read Multiplexor ---------------------- */
     always_comb begin : multiplexor_mem_read
-        case(state)
-            S_FETCH: begin
-                mem_access = MEM_ACCESS_BYTE;
-                mem_addr = PC;
-            end
-        endcase
+        mem_addr = (mem_src == MEM_SRC_PC) ? PC : result;
+        mem_access = MEM_ACCESS_BYTE;
     end
 
     /* ---------------------- Instruction Register Multiplexor ---------------------- */
-    always_comb IR_write = (state == S_FETCH) ? 1 : 0;
     always_comb IR_next = mem_rd_data;
-
+     
 
     /* ---------------------- ALU Control Multiplexor ---------------------- */
     always_comb begin : multiplexor_alu_control 
-        case(state)
-            /* In the fetch state, the ALU is used to increment the PC by 4 */
-            S_FETCH: begin
-                alu_control = ALU_ADD;
-                src_a = PC;
-                src_b = 32'd4;
-            end 
-            S_MEMADR: begin
-                /* Case for load word (lw) instruction */
-                if((IR == 6'd3) && (funct3 == 3'b010)) begin
-                    alu_control = ALU_ADD;
-                    src_a = rs1;
-                    src_b = extended_immediate;
-                end
-            end
+        case(alu_src_a) 
+            ALU_SRC_A_PC: src_a = PC;
+            ALU_SRC_A_RF: src_a = reg_A;
+            ALU_SRC_A_OLD_PC: src_a = PC_old;
+            ALU_SRC_A_ZERO: src_a = 0;
+        endcase
+        case(alu_src_b) 
+            ALU_SRC_B_RF: src_b = reg_B;
+            ALU_SRC_B_IMM: src_b = 0; // todo
+            ALU_SRC_B_4: src_b = 32'd4;
+            ALU_SRC_B_ZERO: src_b = 0;
         endcase
     end
 
@@ -179,6 +193,28 @@ module rv32i_multicycle_core(
         endcase
     end
 
+    /* ---------------------- Datapath ---------------------- */ 
+    always_comb begin : datapath 
+        case(state) 
+            S_FETCH: begin 
+                mem_src = MEM_SRC_PC;
+                IR_write = 1;
+                PC_old_ena = 0;
+            end
+            S_DECODE: begin
+                
+            end
+            S_MEMADR: begin
+                
+            end
+            S_MEMREAD: begin
+                
+            end
+            S_MEMWB: begin
+                
+            end
+        endcase 
+    end
 
     /* ---------------------- CPU Controller State Machine ---------------------- */
     always_ff @(posedge clk) begin : rv32i_multicycle_core
@@ -195,6 +231,5 @@ module rv32i_multicycle_core(
         end
 
     end
-
 
 endmodule
