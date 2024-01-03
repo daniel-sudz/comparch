@@ -54,6 +54,7 @@ module rv32i_multicycle_core(
     always_comb op = IR[6:0];
     always_comb funct3 = IR[14:12];
     always_comb funct7 = IR[31:25];
+    always_comb rd = IR[11:7];
     always_comb rs1 = IR[19:15];
     always_comb rs2 = IR[24:20];
 
