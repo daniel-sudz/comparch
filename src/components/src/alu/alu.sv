@@ -5,6 +5,7 @@
 
 module alu(a, b, control, result, overflow, zero, equal);
     parameter N = 32;
+    parameter ACCOUNT_SHIFT_OVERFLOW = 1;
     
      /* ----- Inputs  ----- */
     input wire signed [N-1:0] a, b;
@@ -55,8 +56,15 @@ module alu(a, b, control, result, overflow, zero, equal);
     endgenerate
 
     logic [N-1:0] shift_overflow_mask;
-    assign shift_overflow_mask = {N{shift_overflow[$clog2(N)]}};
 
+    /* Options to ignore bits set above 5 which will always result to 0 after shift */
+    /* Useful in some cases such as in CPU to more easily parse op codes */
+    if(ACCOUNT_SHIFT_OVERFLOW) begin
+        assign shift_overflow_mask = {N{shift_overflow[$clog2(N)]}};
+    end else begin
+        assign shift_overflow_mask = {N{1'b0}};
+    end
+    
     /* ----- [SLL] Operation Result  ----- */
     logic [N-1:0] NO_OVERFLOW_RESULT_ALU_SLL;
     sll #(N) sll_alu_shifter(.in(a), .shamt(b[$clog2(N)-1:0]), .out(NO_OVERFLOW_RESULT_ALU_SLL));

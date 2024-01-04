@@ -166,7 +166,7 @@ module rv32i_multicycle_core(
     always_comb mem_wr_data = reg_B; // RISC-V always stores data from this location.
 
     /* ---------------------- ALU ---------------------- */
-    alu ALU (
+    alu #(.ACCOUNT_SHIFT_OVERFLOW(0)) ALU (
     .a(src_a), .b(src_b), .result(alu_result),
     .control(alu_control),
     .overflow(overflow), .zero(zero), .equal(equal)
