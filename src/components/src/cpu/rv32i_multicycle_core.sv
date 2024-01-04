@@ -190,28 +190,40 @@ module rv32i_multicycle_core(
         endcase
     end
 
+    /* ---------------------- Default Values ---------------------- */
+    task set_default;
+            // all enables are false unless explicitely asserted
+            PC_old_ena = 0;
+            PC_ena = 0;
+            PC_next_ena = 0;
+            alu_last_ena = 0;
+            mem_data_ena = 0;
+            mem_wr_ena = 0;
+    endtask
+
     /* ---------------------- Datapath ---------------------- */ 
     always_comb begin : datapath_load
         case(state) 
             S_FETCH: begin 
+                set_default;
                 // fetch the PC from memory
                 mem_src = MEM_SRC_PC;
                 mem_access = MEM_ACCESS_WORD;
-
                 // write PC to IR
                 IR_write = 1;
-                // save old PC
-                PC_old_ena = 1;
                 // compute (PC + 4) into PC_next
                 alu_control = ALU_ADD;
                 alu_src_a = ALU_SRC_A_PC;
                 alu_src_b = ALU_SRC_B_4;
+                PC_old_ena = 1;
                 PC_next_ena = 1;
             end
             S_DECODE: begin
+                set_default;
                 // no signals to generate in decode phase
             end
             S_MEMADR: begin
+                set_default;
                 /* LOAD INSTRUCTION compute offset */
                 if(op == 32'd3) begin
                     alu_control = ALU_ADD;
@@ -221,6 +233,7 @@ module rv32i_multicycle_core(
                 end
             end
             S_MEMREAD: begin
+                set_default;
                  /* LOAD INSTRUCTION read from mem */
                  if(op == 32'd3) begin
                     mem_src = MEM_SRC_ALU_LAST;
@@ -228,6 +241,7 @@ module rv32i_multicycle_core(
                  end
             end
             S_MEMWB: begin
+                set_default;
                 /* LOAD INSTRUCTION write back to RF */
                 if(op == 32'd3) begin
                     result_src = RESULT_SRC_MEM_DATA;
@@ -243,6 +257,7 @@ module rv32i_multicycle_core(
     always_comb begin : datapath_r
         case(state)
             S_EXECUTE_RI: begin
+                set_default;
                 alu_src_a = ALU_SRC_A_RF;
                 case(op)
                     `OP_IMMEDIATE_I_EXECUTE: alu_src_b = ALU_SRC_B_IMM;
@@ -250,17 +265,17 @@ module rv32i_multicycle_core(
                 endcase 
                 alu_last_ena = 1;
 
-                case({funct3, funct7, op}) 
+                casex({funct3, funct7, op}) 
                     /* I-type instructions below */
-                    {3'b000, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_ADD;
+                    {3'b000, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_ADD;
                     {3'b001, 7'b0000000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLL;
-                    {3'b010, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLT;
-                    {3'b011, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLTU;
-                    {3'b100, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_XOR;
+                    {3'b010, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLT;
+                    {3'b011, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLTU;
+                    {3'b100, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_XOR;
                     {3'b101, 7'b0000000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SRL;
                     {3'b101, 7'b0100000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SRA;
-                    {3'b110, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_OR;
-                    {3'b111, 7'b???????, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_AND;
+                    {3'b110, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_OR;
+                    {3'b111, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_AND;
 
                     /* R-type instruction below */
                     {3'b000, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_ADD;
@@ -277,6 +292,7 @@ module rv32i_multicycle_core(
                 
             end
             S_ALUWB: begin
+                set_default;
                 result_src = RESULT_SRC_ALU_LAST;
                 reg_write = 1;
                 // move PC up to PC_next
