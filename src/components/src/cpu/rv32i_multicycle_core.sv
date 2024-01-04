@@ -72,6 +72,8 @@ module rv32i_multicycle_core(
         endcase
     end
 
+    logic debug;
+
 
     /* ---------------------- Control Signals [R-file] ---------------------- */
     wire [31:0] reg_data1, reg_data2;
@@ -193,6 +195,7 @@ module rv32i_multicycle_core(
     /* ---------------------- Default Values ---------------------- */
     task set_default;
             // all enables are false unless explicitely asserted
+            debug = 0;
             PC_old_ena = 0;
             PC_ena = 0;
             PC_next_ena = 0;
@@ -265,31 +268,44 @@ module rv32i_multicycle_core(
                 endcase 
                 alu_last_ena = 1;
 
-                casex({funct3, funct7, op}) 
-                    /* I-type instructions below */
-                    {3'b000, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_ADD;
-                    {3'b001, 7'b0000000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLL;
-                    {3'b010, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLT;
-                    {3'b011, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SLTU;
-                    {3'b100, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_XOR;
-                    {3'b101, 7'b0000000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SRL;
-                    {3'b101, 7'b0100000, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_SRA;
-                    {3'b110, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_OR;
-                    {3'b111, 7'bxxxxxxx, `OP_IMMEDIATE_I_EXECUTE}: alu_control = ALU_AND;
+                debug = 1;
 
+                case(op)
+                     /* I-type instructions below */
+                    `OP_IMMEDIATE_I_EXECUTE: begin
+                        case(funct3)
+                                3'b000: alu_control = ALU_ADD; 
+                                3'b010: alu_control = ALU_SLT;
+                                3'b011: alu_control = ALU_SLTU;
+                                3'b100: alu_control = ALU_XOR; 
+                                3'b110: alu_control = ALU_OR;
+                                3'b111: alu_control = ALU_AND;
+                                3'b001: alu_control = ALU_SLL;
+                                3'b101: begin
+                                /* func7 is implicitely used to differentiate these two ops */
+                                    case(funct7)
+                                        7'b0000000: alu_control = ALU_SRL;
+                                        7'b0100000: alu_control = ALU_SRA;
+                                    endcase
+                                end
+                        endcase
+                    end
                     /* R-type instruction below */
-                    {3'b000, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_ADD;
-                    {3'b000, 7'b0100000, `OP_R_EXECUTE}: alu_control = ALU_SUB;
-                    {3'b001, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SLL;
-                    {3'b010, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SLT;
-                    {3'b011, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SLTU;
-                    {3'b100, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_XOR;
-                    {3'b101, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_SRL;
-                    {3'b101, 7'b0100000, `OP_R_EXECUTE}: alu_control = ALU_SRA;
-                    {3'b110, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_OR;
-                    {3'b111, 7'b0000000, `OP_R_EXECUTE}: alu_control = ALU_AND;
+                    `OP_R_EXECUTE: begin
+                        case({funct3, funct7})
+                                {3'b000, 7'b0000000}: alu_control = ALU_ADD;
+                                {3'b000, 7'b0100000}: alu_control = ALU_SUB;
+                                {3'b001, 7'b0000000}: alu_control = ALU_SLL;
+                                {3'b010, 7'b0000000}: alu_control = ALU_SLT;
+                                {3'b011, 7'b0000000}: alu_control = ALU_SLTU;
+                                {3'b100, 7'b0000000}: alu_control = ALU_XOR;
+                                {3'b101, 7'b0000000}: alu_control = ALU_SRL;
+                                {3'b101, 7'b0100000}: alu_control = ALU_SRA;
+                                {3'b110, 7'b0000000}: alu_control = ALU_OR;
+                                {3'b111, 7'b0000000}: alu_control = ALU_AND;
+                        endcase
+                    end
                 endcase
-                
             end
             S_ALUWB: begin
                 set_default;
