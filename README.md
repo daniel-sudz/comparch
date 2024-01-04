@@ -2,6 +2,52 @@
 
 ## Components Checklist
 
+### CPU
+- R-types (validated againt https://github.com/avinash-nonholonomy/olin-cafe-f23/blob/main/asm/irtypes.s)
+  - [x] add
+  - [x] sub
+  - [x] xor
+  - [x] or
+  - [x] and
+  - [x] sll
+  - [x] srl
+  - [x] sra
+  - [x] slt
+  - [x] sltu
+- I-types (validated against https://github.com/avinash-nonholonomy/olin-cafe-f23/blob/main/asm/irtypes.s)
+  - [x] addi
+  - [x] xori
+  - [x] ori
+  - [x] andi
+  - [x] slli
+  - [x] srli
+  - [x] srai
+  - [x] slti
+  - [x] sltiu
+- Memory-Types (Loads/Stores)
+  - [ ] lw
+  - [ ] sw
+  - [ ] *lb*
+  - [ ] *lh*
+  - [ ] *lbu*
+  - [ ] *lhu*
+  - [ ] *sb*
+  - [ ] *sh*
+
+- B-types (Branches)
+  - [ ] beq
+  - [ ] bne
+  - [ ] *blt*
+  - [ ] *bge*
+  - [ ] *bltu*
+  - [ ] *bgeu*
+- J-types (Jumps)
+  - [ ] jal
+  - [ ] jalr (technically an i-type)
+- U-types (Upper immediates)
+  - [ ] *lui*
+  - [ ] *auipc*
+
 ### ALU
 - [x] 32bit (structural with SLTU/overflow)
 
