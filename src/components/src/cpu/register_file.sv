@@ -41,7 +41,7 @@ module register_file(rst, clk, wr_ena, wr_addr, wr_data, rd_addr0, rd_data0, rd_
     decoder_5_to_32 write_decoder(.ena(1'b1), .in(wr_addr), .out(write_addr_decoded));
 
     // intermediates for our registers
-    logic [31:0] xn [31:0];         
+    logic signed [31:0] xn [31:0];         
     
     // x00 is always zero constant
     assign xn[0] = 32'd0;     
