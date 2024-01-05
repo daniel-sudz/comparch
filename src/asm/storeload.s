@@ -1,7 +1,7 @@
 addi  x1, x0, -100             # x01 = -100
 addi  x2, x0, 1024             # x02 = 0
-sw  x1, 0(x2)                  # (0) = -1
-lw  x3, 0(x2)                  # x03 = -1
+sw  x1, 0(x2)                  # (MEM:1024) = -100
+lw  x3, 0(x2)                  # x03 = -100
 
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
