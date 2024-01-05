@@ -209,9 +209,17 @@ module rv32i_multicycle_core(
     endtask
  
     /* -------------------------------------------------------------------------------------------------------------------*/
-    /*                                              DATAPATH for LOADS (begin)                                            */
+    /*                                              DATAPATH for LOADS/STORES (begin)                                     */
     /* -------------------------------------------------------------------------------------------------------------------*/
     always_comb begin : datapath_load
+        // mem_access is set the same for store/load during S_MEMREAD and S_MEMWRITE phases
+        // special case for S_FETCH below where it swaps to MEM_ACCESS_WORD
+        case(funct3)
+            3'b000: mem_access = MEM_ACCESS_BYTE;
+            3'b001: mem_access = MEM_ACCESS_HALF;
+            3'b010: mem_access = MEM_ACCESS_WORD;
+        endcase
+
         case(state) 
             S_FETCH: begin 
                 set_default;
@@ -227,27 +235,33 @@ module rv32i_multicycle_core(
                 PC_old_ena = 1;
                 PC_next_ena = 1;
             end
+            /* no signals to generate in decode phase */
             S_DECODE: begin
                 set_default;
-                // no signals to generate in decode phase
             end
-            S_MEMADR: begin
+            /* LOAD INSTRUCTION compute offset */
+            S_MEMADR: begin 
                 set_default;
-                /* LOAD INSTRUCTION compute offset */
                 alu_control = ALU_ADD;
                 alu_src_a = ALU_SRC_A_RF;
                 alu_src_b = ALU_SRC_B_IMM;
                 alu_last_ena = 1;
             end
+            /* LOAD INSTRUCTION read from mem */
             S_MEMREAD: begin
                 set_default;
-                 /* LOAD INSTRUCTION read from mem */
                 mem_src = MEM_SRC_ALU_LAST;
                 mem_data_ena = 1;
             end
+            /* STORE INSTRUCTION write to mem */
+            S_MEMWRITE: begin 
+                set_default;
+                mem_wr_ena = 1;
+                PC_ena = 1;
+            end
+             /* LOAD INSTRUCTION write back to RF */
             S_MEMWB: begin
                 set_default;
-                /* LOAD INSTRUCTION write back to RF */
                 result_src = RESULT_SRC_MEM_DATA;
                 reg_write = 1;
                 // move PC up to PC_next
@@ -256,7 +270,7 @@ module rv32i_multicycle_core(
         endcase 
     end
     /* -------------------------------------------------------------------------------------------------------------------*/
-    /*                                              DATAPATH for LOADS (end)                                              */
+    /*                                              DATAPATH for LOADS/STORES (end)                                       */
     /* -------------------------------------------------------------------------------------------------------------------*/
 
     /* -------------------------------------------------------------------------------------------------------------------*/
