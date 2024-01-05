@@ -18,7 +18,7 @@ module rv32_simulator;
     mem_access_t mem_access;
     wire [31:0] mem_addr, mem_wr_data, mem_rd_data, PC;
     wire mem_wr_ena, instruction_done;
-    mem_exception_mask_t mem_exception = MEM_EXCEPTION_NONE;
+    mem_exception_mask_t mem_exception;
     wire [31:0] instructions_completed;
 
     rv32i_multicycle_core CORE (

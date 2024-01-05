@@ -268,6 +268,7 @@ module rv32i_multicycle_core(
             S_MEMWRITE: begin 
                 set_default;
                 mem_wr_ena = 1;
+                mem_src = MEM_SRC_ALU_LAST;
                 PC_ena = 1;
             end
              /* LOAD INSTRUCTION write back to RF */
