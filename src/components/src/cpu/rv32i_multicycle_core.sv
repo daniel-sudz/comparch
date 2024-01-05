@@ -19,7 +19,17 @@ module rv32i_multicycle_core(
     `define OP_R_EXECUTE 6'b0110011
     `define OP_I_STORE 6'b0100011
     
-    enum logic [3:0] {S_FETCH, S_DECODE, S_MEMADR, S_MEMREAD, S_MEMWB, S_EXECUTE_RI, S_ALUWB, S_MEMWRITE} state;
+    /* enum values assigned for debug purposes. Sync them with the gtkwave folder */
+    enum logic [3:0] {
+        S_FETCH = 0, 
+        S_DECODE = 1, 
+        S_MEMADR = 2, 
+        S_MEMREAD = 3, 
+        S_MEMWB = 4, 
+        S_EXECUTE_RI = 5, 
+        S_ALUWB = 6, 
+        S_MEMWRITE = 7
+    } state;
 
     parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
 
@@ -286,8 +296,6 @@ module rv32i_multicycle_core(
                     default : alu_src_b = ALU_SRC_B_RF;
                 endcase 
                 alu_last_ena = 1;
-
-                debug = 1;
 
                 case(op)
                      /* I-type instructions below */
