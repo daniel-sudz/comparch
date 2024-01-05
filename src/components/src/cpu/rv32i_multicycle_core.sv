@@ -213,6 +213,7 @@ module rv32i_multicycle_core(
             PC_old_ena = 0;
             PC_ena = 0;
             PC_next_ena = 0;
+            IR_write = 0;
             alu_last_ena = 0;
             mem_data_ena = 0;
             mem_wr_ena = 0;
@@ -357,6 +358,7 @@ module rv32i_multicycle_core(
                 S_DECODE: begin
                     case(op)
                         `OP_I_LOAD: state <= S_MEMADR;
+                        `OP_I_STORE: state <= S_MEMADR;
                         `OP_IMMEDIATE_I_EXECUTE: state <= S_EXECUTE_RI;
                         `OP_R_EXECUTE: state <= S_EXECUTE_RI;
                     endcase
