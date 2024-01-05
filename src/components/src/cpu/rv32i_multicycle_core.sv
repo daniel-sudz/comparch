@@ -373,6 +373,7 @@ module rv32i_multicycle_core(
                 end
                 S_MEMREAD: state <= S_MEMWB;
                 S_MEMWB: state <= S_FETCH;
+                S_MEMWRITE: state <= S_FETCH;
             endcase 
         end
 
