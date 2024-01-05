@@ -15,11 +15,21 @@ module rv32i_multicycle_core(
     );
 
     `define OP_IMMEDIATE_I_EXECUTE 6'b0010011
-    `define OP_IMMEDIATE_I_LOAD 6'b0000011
-
+    `define OP_I_LOAD 6'b0000011
     `define OP_R_EXECUTE 6'b0110011
+    `define OP_I_STORE 6'b0100011
     
-    enum logic [3:0] {S_FETCH, S_DECODE, S_MEMADR, S_MEMREAD, S_MEMWB, S_EXECUTE_RI, S_ALUWB} state;
+    /* enum values assigned for debug purposes. Sync them with the gtkwave folder */
+    enum logic [3:0] {
+        S_FETCH = 0, 
+        S_DECODE = 1, 
+        S_MEMADR = 2, 
+        S_MEMREAD = 3, 
+        S_MEMWB = 4, 
+        S_EXECUTE_RI = 5, 
+        S_ALUWB = 6, 
+        S_MEMWRITE = 7
+    } state;
 
     parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
 
@@ -42,7 +52,9 @@ module rv32i_multicycle_core(
     logic PC_next_ena, PC_ena, PC_old_ena;
     logic [31:0] PC_next;
 
-    /* ---------------------- Instruction Decoder ---------------------- */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              Instruction Decoder (begin)                                           */
+    /* -------------------------------------------------------------------------------------------------------------------*/
     logic [6:0] op;
     logic [2:0] funct3;
     logic [6:0] funct7;
@@ -60,19 +72,22 @@ module rv32i_multicycle_core(
 
     always_comb begin : instruction_type_decoder
         case(op) 
-            `OP_IMMEDIATE_I_LOAD: instruction_type = itype;
+            `OP_I_LOAD: instruction_type = itype;
             `OP_IMMEDIATE_I_EXECUTE: instruction_type = itype;
             `OP_R_EXECUTE: instruction_type = rtype;
+            `OP_I_STORE: instruction_type = stype;
         endcase
     end
 
     always_comb begin : extended_immediate_decoder
-        case(instruction_type) 
+        case(instruction_type)
             itype: extended_immediate = {{20{IR[31]}}, IR[31:20]};
+            stype: extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
         endcase
     end
-
-    logic debug;
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              Instruction Decoder (end)                                             */
+    /* -------------------------------------------------------------------------------------------------------------------*/
 
 
     /* ---------------------- Control Signals [R-file] ---------------------- */
@@ -193,19 +208,29 @@ module rv32i_multicycle_core(
     end
 
     /* ---------------------- Default Values ---------------------- */
-    task set_default;
+    task automatic set_default;
             // all enables are false unless explicitely asserted
-            debug = 0;
             PC_old_ena = 0;
             PC_ena = 0;
             PC_next_ena = 0;
+            IR_write = 0;
             alu_last_ena = 0;
             mem_data_ena = 0;
             mem_wr_ena = 0;
     endtask
-
-    /* ---------------------- Datapath ---------------------- */ 
+ 
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for LOADS/STORES (begin)                                     */
+    /* -------------------------------------------------------------------------------------------------------------------*/
     always_comb begin : datapath_load
+        // mem_access is set the same for store/load during S_MEMREAD and S_MEMWRITE phases
+        // special case for S_FETCH below where it swaps to MEM_ACCESS_WORD
+        case(funct3)
+            3'b000: mem_access = MEM_ACCESS_BYTE;
+            3'b001: mem_access = MEM_ACCESS_HALF;
+            3'b010: mem_access = MEM_ACCESS_WORD;
+        endcase
+
         case(state) 
             S_FETCH: begin 
                 set_default;
@@ -221,43 +246,49 @@ module rv32i_multicycle_core(
                 PC_old_ena = 1;
                 PC_next_ena = 1;
             end
+            /* no signals to generate in decode phase */
             S_DECODE: begin
                 set_default;
-                // no signals to generate in decode phase
             end
-            S_MEMADR: begin
+            /* LOAD INSTRUCTION compute offset */
+            S_MEMADR: begin 
                 set_default;
-                /* LOAD INSTRUCTION compute offset */
-                if(op == 32'd3) begin
-                    alu_control = ALU_ADD;
-                    alu_src_a = ALU_SRC_A_RF;
-                    alu_src_b = ALU_SRC_B_IMM;
-                    alu_last_ena = 1;
-                end
+                alu_control = ALU_ADD;
+                alu_src_a = ALU_SRC_A_RF;
+                alu_src_b = ALU_SRC_B_IMM;
+                alu_last_ena = 1;
             end
+            /* LOAD INSTRUCTION read from mem */
             S_MEMREAD: begin
                 set_default;
-                 /* LOAD INSTRUCTION read from mem */
-                 if(op == 32'd3) begin
-                    mem_src = MEM_SRC_ALU_LAST;
-                    mem_data_ena = 1;
-                 end
+                mem_src = MEM_SRC_ALU_LAST;
+                mem_data_ena = 1;
             end
+            /* STORE INSTRUCTION write to mem */
+            S_MEMWRITE: begin 
+                set_default;
+                mem_wr_ena = 1;
+                mem_src = MEM_SRC_ALU_LAST;
+                PC_ena = 1;
+            end
+             /* LOAD INSTRUCTION write back to RF */
             S_MEMWB: begin
                 set_default;
-                /* LOAD INSTRUCTION write back to RF */
-                if(op == 32'd3) begin
-                    result_src = RESULT_SRC_MEM_DATA;
-                    reg_write = 1;
-                end
-
+                result_src = RESULT_SRC_MEM_DATA;
+                reg_write = 1;
                 // move PC up to PC_next
                 PC_ena = 1;
             end
         endcase 
     end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for LOADS/STORES (end)                                       */
+    /* -------------------------------------------------------------------------------------------------------------------*/
 
-    always_comb begin : datapath_r
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for RI (begin)                                               */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    always_comb begin : datapath_ri
         case(state)
             S_EXECUTE_RI: begin
                 set_default;
@@ -267,8 +298,6 @@ module rv32i_multicycle_core(
                     default : alu_src_b = ALU_SRC_B_RF;
                 endcase 
                 alu_last_ena = 1;
-
-                debug = 1;
 
                 case(op)
                      /* I-type instructions below */
@@ -316,6 +345,9 @@ module rv32i_multicycle_core(
             end
         endcase 
     end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for RI (end)                                                 */
+    /* -------------------------------------------------------------------------------------------------------------------*/
 
     /* ---------------------- CPU Controller State Machine ---------------------- */
     always_ff @(posedge clk) begin : rv32i_multicycle_core
@@ -325,20 +357,24 @@ module rv32i_multicycle_core(
             case(state) 
                 S_FETCH: state <= S_DECODE;
                 S_DECODE: begin
-                    /* Load or store instructions */
-                    if((op == 6'b0000011) || (op == 6'b0100011)) begin
-                        state <= S_MEMADR;
-                    end 
-                    /* RI-type instructions */
-                    else if(op == 6'b0110011 || (op == 6'b0010011)) begin
-                        state <= S_EXECUTE_RI;
-                    end
+                    case(op)
+                        `OP_I_LOAD: state <= S_MEMADR;
+                        `OP_I_STORE: state <= S_MEMADR;
+                        `OP_IMMEDIATE_I_EXECUTE: state <= S_EXECUTE_RI;
+                        `OP_R_EXECUTE: state <= S_EXECUTE_RI;
+                    endcase
                 end
                 S_EXECUTE_RI: state <= S_ALUWB;
                 S_ALUWB: state <= S_FETCH;
-                S_MEMADR: state <= S_MEMREAD;
+                S_MEMADR: begin
+                    case(op)
+                        `OP_I_LOAD: state <= S_MEMREAD;
+                        `OP_I_STORE: state <= S_MEMWRITE;
+                    endcase
+                end
                 S_MEMREAD: state <= S_MEMWB;
                 S_MEMWB: state <= S_FETCH;
+                S_MEMWRITE: state <= S_FETCH;
             endcase 
         end
 
