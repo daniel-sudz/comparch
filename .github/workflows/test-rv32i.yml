@@ -29,7 +29,9 @@ jobs:
       
 
       - name: Install Tool Chain
-        run: sudo apt-get install -y gcc make iverilog
+        run: |
+          sudo apt-get install -y gcc make iverilog
+          pip3 install bitstring        
    
       - name: Run Tests
         run: |
