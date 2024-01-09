@@ -1,24 +1,7 @@
-addi  x1, x0, -1   # x01 = -1
-addi  x2, x0, 35   # x02 = 35
-xori  x3, x2, 68   # x03 = 103
-ori   x4, x2, 17   # x04 = 51
-andi  x5, x2, 17   # x05 = 1
-slli  x6, x1, 8    # x06 = -256
-srli  x7, x3, 2    # x07 = 25
-srai  x8, x6, 6    # x08 = -4
-slti  x9, x1, 35   # x09 = 1
-sltiu x10, x1, 35  # x10 = 0
-add   x11, x1, x1  # x11 = -2
-sub   x12, x1, x1  # x12 = 0
-xor   x13, x1, x12 # x13 = -1
-or    x14, x2, x3  # x14 = 103
-and   x15, x2, x3  # x15 = 35
-addi  x16, x0, 4   # x16 = 4
-sll   x17, x2, x16 # x17 = 560 
-srl   x18, x3, x16 # x18 = 6
-sra   x19, x6, x16 # x19 = -16
-slt   x20, x1, x2  # x20 = 1
-sltu  x21, x1, x2  # x20 = 0
+WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/irtypes.memh): Not enough words in the file for the requested range [0:1023].
+Running simulation of memory ../asm/out/irtypes.memh for up to         100 cycles. Waves will be stored to rv32_simulator.fst.
+FST info: dumpfile rv32_simulator.fst opened for output.
+Ran         100 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
@@ -44,14 +27,14 @@ sltu  x21, x1, x2  # x20 = 0
 #TESTASSERTOUTPUT|      x19, s3 = 0xfffffff0 (       -16)|
 #TESTASSERTOUTPUT|      x20, s4 = 0x00000001 (         1)|
 #TESTASSERTOUTPUT|      x21, s5 = 0x00000000 (         0)|
-#TESTASSERTIGNORE|      x22, s6 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|      x23, s7 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|      x24, s8 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|      x25, s9 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|     x26, s10 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|     x27, s11 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|      x28, t3 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|      x29, t4 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|      x30, t5 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|      x31, t6 = 0xxxxxxxxx (         x)|
-#TESTASSERTIGNORE|---------------------------------------|
+#TESTASSERTOUTPUT|      x22, s6 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x23, s7 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x24, s8 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x25, s9 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|     x26, s10 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|     x27, s11 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x28, t3 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x29, t4 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x30, t5 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x31, t6 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|---------------------------------------|

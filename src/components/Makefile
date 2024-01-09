@@ -103,7 +103,7 @@ rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
 
 # Validates that the simulator output is as expected
 %.validate: %.result
-	node ../asm/validate.js test/$< $(basename $<).s
+	node ../asm/validate.js $(basename $<).s test/$< 
 
 test_rv32_all: itypes.validate irtypes.validate storeload.validate
 
