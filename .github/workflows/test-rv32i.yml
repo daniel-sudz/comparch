@@ -12,16 +12,19 @@ jobs:
         component: [
           test_sample,
           test_muxes_all, 
-          test_decoders_all 
-          test_shifters_all 
-          test_comparators_all 
-          test_adders_all 
-          test_alu_all 
-          test_register_file_all 
-          test_rv32_all]
+          test_decoders_all,
+          test_shifters_all,
+          test_comparators_all, 
+          test_adders_all,
+          test_alu_all, 
+          test_register_file_all,
+          test_rv32_all
+        ]
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       
 
       - name: Install Tool Chain
