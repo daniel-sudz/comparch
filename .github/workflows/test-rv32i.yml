@@ -1,0 +1,39 @@
+name: Test rv32i
+
+on: [push]
+
+jobs:
+  test:
+      
+    runs-on: ubuntu-latest 
+
+    strategy:
+      matrix:
+        component: [
+          test_sample,
+          test_muxes_all, 
+          test_decoders_all,
+          test_shifters_all,
+          test_comparators_all, 
+          test_adders_all,
+          test_alu_all, 
+          test_register_file_all,
+          test_rv32_all
+        ]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULES_TOKEN_KEY }}
+      
+
+      - name: Install Tool Chain
+        run: |
+          sudo apt-get install -y gcc make iverilog
+          pip3 install bitstring        
+   
+      - name: Run Tests
+        run: |
+          cd src/components
+          make ${{ matrix.component }}

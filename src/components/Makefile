@@ -84,27 +84,31 @@ test_register_file_provided: tests/provided/test_register_file.sv src/**/*.sv
 
 test_register_file_all: test_register_file_our test_register_file_provided
 
-# Assembles .s (human readable) files into .memh (Verilog readable binary) files.
-%.memh: ../asm/%.s $(TOOLS_ROOT)/assembler.py $(TOOLS_ROOT)/rv32i.py
-	$(TOOLS_ROOT)/assembler.py $< -o ../asm/out/$@
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Instruction Type Tests
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-r32_assemble: foo.memh
+# Assembles .s (human readable) files into .memh (Verilog readable binary) files.
+%.memh: ../asm/%.s $(TOOLS_ROOT)/assembler.py $(TOOLS_ROOT)/rv32i.py
+	$(TOOLS_ROOT)/assembler.py $< -o ../asm/out/$@
 
+# The actual simulator for rv32i
 rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
 	${IVERILOG} -y ./rv32 $^ -s $@ -o $@.bin
 
-test_rv32_itypes: rv32_simulator itypes.memh
-	./rv32_simulator.bin +initial_memory=../asm/out/itypes.memh ${VVP_POST}
+# Runs the assembled .memh files through the simulator and writes out the register file state
+%.result: %.memh rv32_simulator
+	./rv32_simulator.bin +initial_memory=../asm/out/$< ${VVP_POST} 2>&1 | tee ../asm/test/$(basename $<).result
 
-test_rv32_irtypes: rv32_simulator irtypes.memh
-	./rv32_simulator.bin +initial_memory=../asm/out/irtypes.memh ${VVP_POST}
+# Validates that the simulator output is as expected
+%.validate: %.result
+	node ../asm/validate.js $(basename $<).s test/$< 
 
+test_rv32_all: itypes.validate irtypes.validate storeload.validate
 
-test_rv32_storeload: rv32_simulator storeload.memh
-	./rv32_simulator.bin +initial_memory=../asm/out/storeload.memh ${VVP_POST}
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Instruction Type Tests
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all test_register_file_all
+all: test_sample test_muxes_all test_decoders_all test_shifters_all test_comparators_all test_adders_all test_alu_all test_register_file_all test_rv32_all

@@ -1,7 +1,7 @@
-addi  x1, x0, -100             # x01 = -100
-addi  x2, x0, 1024             # x02 = 1024
-sw  x1, 0(x2)                  # (MEM:1024) = -100
-lw  x3, 0(x2)                  # x03 = -100
+WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/storeload.memh): Not enough words in the file for the requested range [0:1023].
+Running simulation of memory ../asm/out/storeload.memh for up to         100 cycles. Waves will be stored to rv32_simulator.fst.
+FST info: dumpfile rv32_simulator.fst opened for output.
+Ran         100 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|

@@ -14,10 +14,11 @@ module rv32i_multicycle_core(
     PC, instructions_completed, instruction_done
     );
 
-    `define OP_IMMEDIATE_I_EXECUTE 6'b0010011
-    `define OP_I_LOAD 6'b0000011
-    `define OP_R_EXECUTE 6'b0110011
-    `define OP_I_STORE 6'b0100011
+    `define OP_IMMEDIATE_I_EXECUTE 7'b0010011
+    `define OP_I_LOAD 7'b0000011
+    `define OP_R_EXECUTE 7'b0110011
+    `define OP_I_STORE 7'b0100011
+    `define OP_BRANCH 7'b1100011
     
     /* enum values assigned for debug purposes. Sync them with the gtkwave folder */
     enum logic [3:0] {
@@ -28,11 +29,9 @@ module rv32i_multicycle_core(
         S_MEMWB = 4, 
         S_EXECUTE_RI = 5, 
         S_ALUWB = 6, 
-        S_MEMWRITE = 7
+        S_MEMWRITE = 7,
+        S_BRANCH = 8
     } state;
-
-    parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
-
 
     /* ---------------------- Standard Control Signals ---------------------- */
     input  wire clk, rst, ena; // <- worry about implementing the ena signal last.
@@ -44,13 +43,6 @@ module rv32i_multicycle_core(
     output mem_access_t mem_access;
     input mem_exception_mask_t mem_exception;
     output logic mem_wr_ena;
-
-    /* ---------------------- Program Counter ---------------------- */
-    output wire [31:0] PC;
-    output logic [31:0] instructions_completed; // TODO(student) - increment this by one whenever an instruction is complete.
-    wire [31:0] PC_old;
-    logic PC_next_ena, PC_ena, PC_old_ena;
-    logic [31:0] PC_next;
 
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              Instruction Decoder (begin)                                           */
@@ -151,16 +143,31 @@ module rv32i_multicycle_core(
     .clk(clk), .rst(rst), .ena(IR_write), .d(IR_next), .q(IR)
     );
 
-    /* ---------------------- Program Counter Register ---------------------- */
-    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_REGISTER (
-    .clk(clk), .rst(rst), .ena(PC_ena), .d(PC_next), .q(PC)
-    );
-    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_NEXT_REGISTER (
-    .clk(clk), .rst(rst), .ena(PC_next_ena), .d(alu_result), .q(PC_next)
-    );
-    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_OLD_REGISTER (
-    .clk(clk), .rst(rst), .ena(PC_old_ena), .d(PC), .q(PC_old)
-    );
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              Program Counter States (begin)                                        */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    output wire [31:0] PC;
+    parameter [31:0] PC_START_ADDRESS = {MMU_BANK_INST, 28'h0};
+    output logic [31:0] instructions_completed; // TODO(student) - increment this by one whenever an instruction is complete.
+
+    logic PC_ena, PC_old_ena, PC_next_instruction_ena;
+    logic [31:0] PC_old, PC_next, PC_next_jump, PC_next_instruction;
+
+    enum logic [2:0] {PC_NEXT_JUMP, PC_NEXT_INSTRUCTION} pc_next_src;
+
+    always_comb begin : pc_next_src_multiplexor
+        case(pc_next_src)
+            PC_NEXT_INSTRUCTION: PC_next = PC_next_instruction;
+            PC_NEXT_JUMP: PC_next = alu_last;
+        endcase
+    end
+
+    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_REGISTER (.clk(clk), .rst(rst), .ena(PC_ena), .d(PC_next), .q(PC));
+    register #(.N(32), .RESET_VALUE('x)) PC_NEXT_INSTRUCTION_REGISTER (.clk(clk), .rst(rst), .ena(PC_next_instruction_ena), .d(alu_result), .q(PC_next_instruction));
+    register #(.N(32), .RESET_VALUE('x)) PC_OLD_REGISTER (.clk(clk), .rst(rst), .ena(PC_old_ena), .d(PC), .q(PC_old));
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              Program Counter States (end)                                          */
+    /* -------------------------------------------------------------------------------------------------------------------*/
 
     /* ---------------------- Register File ---------------------- */
     register_file REGISTER_FILE(
@@ -212,7 +219,7 @@ module rv32i_multicycle_core(
             // all enables are false unless explicitely asserted
             PC_old_ena = 0;
             PC_ena = 0;
-            PC_next_ena = 0;
+            PC_next_instruction_ena = 0;
             IR_write = 0;
             alu_last_ena = 0;
             mem_data_ena = 0;
@@ -244,13 +251,17 @@ module rv32i_multicycle_core(
                 alu_src_a = ALU_SRC_A_PC;
                 alu_src_b = ALU_SRC_B_4;
                 PC_old_ena = 1;
-                PC_next_ena = 1;
+                PC_next_instruction_ena = 1;
             end
-            /* no signals to generate in decode phase */
+            // use the alu in this phase to compute jump target if needed
             S_DECODE: begin
                 set_default;
+                alu_control = ALU_ADD;
+                alu_src_a = ALU_SRC_A_OLD_PC;
+                alu_src_b = ALU_SRC_B_IMM;
+                alu_last_ena = 1;
             end
-            /* LOAD INSTRUCTION compute offset */
+            // LOAD INSTRUCTION compute offset
             S_MEMADR: begin 
                 set_default;
                 alu_control = ALU_ADD;
@@ -258,25 +269,26 @@ module rv32i_multicycle_core(
                 alu_src_b = ALU_SRC_B_IMM;
                 alu_last_ena = 1;
             end
-            /* LOAD INSTRUCTION read from mem */
+            // LOAD INSTRUCTION read from mem 
             S_MEMREAD: begin
                 set_default;
                 mem_src = MEM_SRC_ALU_LAST;
                 mem_data_ena = 1;
             end
-            /* STORE INSTRUCTION write to mem */
+            // STORE INSTRUCTION write to mem 
             S_MEMWRITE: begin 
                 set_default;
                 mem_wr_ena = 1;
                 mem_src = MEM_SRC_ALU_LAST;
+                pc_next_src = PC_NEXT_INSTRUCTION;
                 PC_ena = 1;
             end
-             /* LOAD INSTRUCTION write back to RF */
+            // LOAD INSTRUCTION write back to RF 
             S_MEMWB: begin
                 set_default;
                 result_src = RESULT_SRC_MEM_DATA;
                 reg_write = 1;
-                // move PC up to PC_next
+                pc_next_src = PC_NEXT_INSTRUCTION;
                 PC_ena = 1;
             end
         endcase 
@@ -340,8 +352,8 @@ module rv32i_multicycle_core(
                 set_default;
                 result_src = RESULT_SRC_ALU_LAST;
                 reg_write = 1;
-                // move PC up to PC_next
                 PC_ena = 1;
+                pc_next_src = PC_NEXT_INSTRUCTION;
             end
         endcase 
     end
@@ -349,7 +361,63 @@ module rv32i_multicycle_core(
     /*                                              DATAPATH for RI (end)                                                 */
     /* -------------------------------------------------------------------------------------------------------------------*/
 
-    /* ---------------------- CPU Controller State Machine ---------------------- */
+     
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for branch (begin)                                           */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    logic will_jump;
+    always_comb begin: datapath_branch
+        case(op)
+            S_BRANCH: begin
+                set_default;
+                alu_src_a = ALU_SRC_A_RF;
+                alu_src_b = ALU_SRC_B_RF;
+                case(funct3)
+                    // branch equal
+                    3'b000: begin               
+                        will_jump = equal;
+                    end        
+                    // branch not equal                   
+                    3'b001: begin               
+                        will_jump = ~equal;
+                    end
+                    // branch less than
+                    3'b100: begin               
+                        alu_control = ALU_SLT;   
+                        will_jump = alu_result[0];
+                    end
+                    // branch greater or equal
+                    3'b101: begin               
+                        alu_control = ALU_SLT;  
+                        will_jump = ~alu_result[0];    
+                    end
+                     // branch less than unsigned
+                    3'b110: begin              
+                        alu_control = ALU_SLTU;
+                        will_jump = alu_result[0];
+                    end
+                    // branch greater than or equal unsigned
+                    3'b111: begin               
+                        alu_control = ALU_SLTU;
+                        will_jump = ~alu_result[0];
+                    end     
+                endcase
+            end
+        endcase
+        case(will_jump)
+            1'b1: begin
+                pc_next_src = PC_NEXT_JUMP;
+                result_src = RESULT_SRC_ALU_LAST;
+            end
+        endcase
+    end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for branch (end)                                             */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              CPU Controller State Machine (begin)                                  */
+    /* -------------------------------------------------------------------------------------------------------------------*/
     always_ff @(posedge clk) begin : rv32i_multicycle_core
         if(rst) begin
             state <= S_FETCH;
@@ -362,6 +430,7 @@ module rv32i_multicycle_core(
                         `OP_I_STORE: state <= S_MEMADR;
                         `OP_IMMEDIATE_I_EXECUTE: state <= S_EXECUTE_RI;
                         `OP_R_EXECUTE: state <= S_EXECUTE_RI;
+                        `OP_BRANCH: state <= S_BRANCH;
                     endcase
                 end
                 S_EXECUTE_RI: state <= S_ALUWB;
@@ -377,7 +446,9 @@ module rv32i_multicycle_core(
                 S_MEMWRITE: state <= S_FETCH;
             endcase 
         end
-
     end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              CPU Controller State Machine (end)                                    */
+    /* -------------------------------------------------------------------------------------------------------------------*/
 
 endmodule
