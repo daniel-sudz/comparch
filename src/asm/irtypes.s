@@ -19,39 +19,39 @@ srl   x18, x3, x16 # x18 = 6
 sra   x19, x6, x16 # x19 = -16
 slt   x20, x1, x2  # x20 = 1
 sltu  x21, x1, x2  # x20 = 0
-|---------------------------------------|
-| Register File State                   |
-|---------------------------------------|
-|    x00, zero = 0x00000000 (         0)|
-|      x01, ra = 0xffffffff (        -1)|
-|      x02, sp = 0x00000023 (        35)|
-|      x03, gp = 0x00000067 (       103)|
-|      x04, tp = 0x00000033 (        51)|
-|      x05, t0 = 0x00000001 (         1)|
-|      x06, t1 = 0xffffff00 (      -256)|
-|      x07, t2 = 0x00000019 (        25)|
-|      x08, s0 = 0xfffffffc (        -4)|
-|      x09, s1 = 0x00000001 (         1)|
-|      x10, a0 = 0x00000000 (         0)|
-|      x11, a1 = 0xfffffffe (        -2)|
-|      x12, a2 = 0x00000000 (         0)|
-|      x13, a3 = 0xffffffff (        -1)|
-|      x14, a4 = 0x00000067 (       103)|
-|      x15, a5 = 0x00000023 (        35)|
-|      x16, a6 = 0x00000004 (         4)|
-|      x17, a7 = 0x00000230 (       560)|
-|      x18, s2 = 0x00000006 (         6)|
-|      x19, s3 = 0xfffffff0 (       -16)|
-|      x20, s4 = 0x00000001 (         1)|
-|      x21, s5 = 0x00000000 (         0)|
-|      x22, s6 = 0xxxxxxxxx (         x)|
-|      x23, s7 = 0xxxxxxxxx (         x)|
-|      x24, s8 = 0xxxxxxxxx (         x)|
-|      x25, s9 = 0xxxxxxxxx (         x)|
-|     x26, s10 = 0xxxxxxxxx (         x)|
-|     x27, s11 = 0xxxxxxxxx (         x)|
-|      x28, t3 = 0xxxxxxxxx (         x)|
-|      x29, t4 = 0xxxxxxxxx (         x)|
-|      x30, t5 = 0xxxxxxxxx (         x)|
-|      x31, t6 = 0xxxxxxxxx (         x)|
-|---------------------------------------|
+#TESTASSERTOUTPUT|---------------------------------------|
+#TESTASSERTOUTPUT| Register File State  :)               |
+#TESTASSERTOUTPUT|---------------------------------------|
+#TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x01, ra = 0xffffffff (        -1)|
+#TESTASSERTOUTPUT|      x02, sp = 0x00000023 (        35)|
+#TESTASSERTOUTPUT|      x03, gp = 0x00000067 (       103)|
+#TESTASSERTOUTPUT|      x04, tp = 0x00000033 (        51)|
+#TESTASSERTOUTPUT|      x05, t0 = 0x00000001 (         1)|
+#TESTASSERTOUTPUT|      x06, t1 = 0xffffff00 (      -256)|
+#TESTASSERTOUTPUT|      x07, t2 = 0x00000019 (        25)|
+#TESTASSERTOUTPUT|      x08, s0 = 0xfffffffc (        -4)|
+#TESTASSERTOUTPUT|      x09, s1 = 0x00000001 (         1)|
+#TESTASSERTOUTPUT|      x10, a0 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x11, a1 = 0xfffffffe (        -2)|
+#TESTASSERTOUTPUT|      x12, a2 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x13, a3 = 0xffffffff (        -1)|
+#TESTASSERTOUTPUT|      x14, a4 = 0x00000067 (       103)|
+#TESTASSERTOUTPUT|      x15, a5 = 0x00000023 (        35)|
+#TESTASSERTOUTPUT|      x16, a6 = 0x00000004 (         4)|
+#TESTASSERTOUTPUT|      x17, a7 = 0x00000230 (       560)|
+#TESTASSERTOUTPUT|      x18, s2 = 0x00000006 (         6)|
+#TESTASSERTOUTPUT|      x19, s3 = 0xfffffff0 (       -16)|
+#TESTASSERTOUTPUT|      x20, s4 = 0x00000001 (         1)|
+#TESTASSERTOUTPUT|      x21, s5 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x22, s6 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|      x23, s7 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|      x24, s8 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|      x25, s9 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|     x26, s10 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|     x27, s11 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|      x28, t3 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|      x29, t4 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|      x30, t5 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|      x31, t6 = 0xxxxxxxxx (         x)|
+#TESTASSERTOUTPUT|---------------------------------------|

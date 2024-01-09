@@ -1,14 +1,14 @@
-addi  x1, x0, -100             # x01 = -100
-addi  x2, x0, 1024             # x02 = 1024
-sw  x1, 0(x2)                  # (MEM:1024) = -100
-lw  x3, 0(x2)                  # x03 = -100
+ERROR: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh: Unable to open ../asm/out/itypes.memh.memh for reading.
+Running simulation of memory ../asm/out/itypes.memh.memh for up to         100 cycles. Waves will be stored to rv32_simulator.fst.
+FST info: dumpfile rv32_simulator.fst opened for output.
+Ran         100 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x01, ra = 0xffffff9c (      -100)|
-#TESTASSERTOUTPUT|      x02, sp = 0x00000400 (      1024)|
-#TESTASSERTOUTPUT|      x03, gp = 0xffffff9c (      -100)|
+#TESTASSERTOUTPUT|      x01, ra = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x02, sp = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x03, gp = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x04, tp = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x05, t0 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x06, t1 = 0x00000000 (         0)|
