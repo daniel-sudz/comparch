@@ -1,5 +1,5 @@
-ERROR: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh: Unable to open ../asm/out/itypes.memh.memh for reading.
-Running simulation of memory ../asm/out/itypes.memh.memh for up to         100 cycles. Waves will be stored to rv32_simulator.fst.
+WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/itypes.memh): Not enough words in the file for the requested range [0:1023].
+Running simulation of memory ../asm/out/itypes.memh for up to         100 cycles. Waves will be stored to rv32_simulator.fst.
 FST info: dumpfile rv32_simulator.fst opened for output.
 Ran         100 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|
