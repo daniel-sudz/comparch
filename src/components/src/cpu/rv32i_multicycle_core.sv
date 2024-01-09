@@ -162,9 +162,9 @@ module rv32i_multicycle_core(
         endcase
     end
 
-    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_REGISTER (clk, rst, PC_ena, PC_next, PC);
-    register #(.N(32), .RESET_VALUE('x)) PC_NEXT_INSTRUCTION_REGISTER (clk, rst, PC_next_instruction_ena, alu_result, PC_next_instruction);
-    register #(.N(32), .RESET_VALUE('x)) PC_OLD_REGISTER (clk, rst, PC_old_ena, PC, PC_old);
+    register #(.N(32), .RESET_VALUE(PC_START_ADDRESS)) PC_REGISTER (.clk(clk), .rst(rst), .ena(PC_ena), .d(PC_next), .q(PC));
+    register #(.N(32), .RESET_VALUE('x)) PC_NEXT_INSTRUCTION_REGISTER (.clk(clk), .rst(rst), .ena(PC_next_instruction_ena), .d(alu_result), .q(PC_next_instruction));
+    register #(.N(32), .RESET_VALUE('x)) PC_OLD_REGISTER (.clk(clk), .rst(rst), .ena(PC_old_ena), .d(PC), .q(PC_old));
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              Program Counter States (end)                                          */
     /* -------------------------------------------------------------------------------------------------------------------*/
