@@ -43,19 +43,23 @@ module test_register_file;
                 wr_addr = i;
                 wr_data_gen = $random();
                 wr_data = wr_data_gen;
-                #1; 
                 @(posedge clk);
 
-                // read from register
+                 // test to make sure enable works correctly
+                @(negedge clk);
+                wr_ena = 0;
+                wr_data = $random();
+                wr_addr = i;
+                @(posedge clk);
+
+                // test reading from register
+                @(negedge clk);
                 wr_ena = 0;
                 rd_addr0 = i;
                 rd_addr1 = i;
+                #1;
 
-                // test to make sure enable works correctly
-                wr_data = $random();
-
-                #5;
-
+            
                 // check value of register
                 $display("[register_file]: [rd_addr0: %0d], [rd_data0: %0d], [rd_addr1: %0d], [rd_data1: %0d], [exp_rd_data0: %0d]", rd_addr0, rd_data1, rd_addr1, rd_data1, wr_data);
                 assert(wr_data_gen == rd_data0) else $fatal;
