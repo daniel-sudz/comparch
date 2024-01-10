@@ -35,7 +35,8 @@ module rv32i_multicycle_core(
         S_ALUWB = 6, 
         S_MEMWRITE = 7,
         S_BRANCH = 8,
-        S_JALR = 9
+        S_JALR = 9,
+        S_UIPC = 10
     } state;
 
     /* ---------------------- Standard Control Signals ---------------------- */
@@ -123,7 +124,13 @@ module rv32i_multicycle_core(
     
 
     /* ---------------------- Result SRC Signals ---------------------- */
-    enum logic [1:0] {RESULT_SRC_ALU, RESULT_SRC_MEM_DATA, RESULT_SRC_ALU_LAST, RESULT_SRC_PC_NEXT_INSTRUCTION} result_src; 
+    enum logic [2:0] {
+        RESULT_SRC_ALU, 
+        RESULT_SRC_MEM_DATA, 
+        RESULT_SRC_ALU_LAST, 
+        RESULT_SRC_PC_NEXT_INSTRUCTION,
+        RESULT_SRC_IMMEDIATE
+    } result_src; 
     logic [31:0] result;
 
     always_comb begin : result_signals
@@ -132,6 +139,7 @@ module rv32i_multicycle_core(
             RESULT_SRC_MEM_DATA: result = mem_data;
             RESULT_SRC_ALU_LAST: result = alu_last;
             RESULT_SRC_PC_NEXT_INSTRUCTION: result = PC_next_instruction;
+            RESULT_SRC_IMMEDIATE: result = extended_immediate;
         endcase
     end
 
@@ -346,6 +354,25 @@ module rv32i_multicycle_core(
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              DATAPATH for RI (end)                                                 */
     /* -------------------------------------------------------------------------------------------------------------------*/
+
+
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for auipc (begin)                                            */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    always_comb begin: auipc_datapath
+        case(state)
+            S_UIPC: begin
+                set_default;
+                alu_control = ALU_ADD;
+                alu_src_a = ALU_SRC_A_PC;
+                alu_src_b = ALU_SRC_B_IMM;
+                alu_last_ena = 1;
+            end
+        endcase
+    end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for auipc (end)                                              */
+    /* -------------------------------------------------------------------------------------------------------------------*/
     
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              DATAPATH for ALU WB (begin)                                           */
@@ -368,6 +395,10 @@ module rv32i_multicycle_core(
                     `OP_JALR: begin
                         result_src = RESULT_SRC_PC_NEXT_INSTRUCTION;
                         pc_next_src = PC_NEXT_JUMP;
+                    end
+                    `OP_U_IPC: begin
+                        result_src = RESULT_SRC_ALU_LAST;
+                        pc_next_src = PC_NEXT_INSTRUCTION;
                     end
                 endcase
             end
@@ -395,6 +426,12 @@ module rv32i_multicycle_core(
                         `OP_JAL: begin
                             alu_src_a = ALU_SRC_A_OLD_PC;
                             alu_src_b = ALU_SRC_B_IMM;
+                        end
+                        `OP_U_LUI: begin
+                            result_src = RESULT_SRC_IMMEDIATE;
+                            reg_write = 1;
+                            pc_next_src = PC_NEXT_INSTRUCTION;
+                            PC_ena = 1;
                         end
                     endcase
                 end
@@ -492,15 +529,18 @@ module rv32i_multicycle_core(
                 S_DECODE: begin
                     case(op)
                         `OP_I_LOAD: state <= S_MEMADR;
+                        `OP_U_LUI: state <= S_FETCH;
                         `OP_I_STORE: state <= S_MEMADR;
                         `OP_IMMEDIATE_I_EXECUTE: state <= S_EXECUTE_RI;
                         `OP_R_EXECUTE: state <= S_EXECUTE_RI;
+                        `OP_U_IPC: state <= S_UIPC;
                         `OP_BRANCH: state <= S_BRANCH;
                         `OP_JAL: state <= S_ALUWB;
                         `OP_JALR: state <= S_JALR;
                     endcase
                 end
                 S_EXECUTE_RI: state <= S_ALUWB;
+                S_UIPC: state <= S_ALUWB;
                 S_JALR : state <= S_ALUWB;
                 S_ALUWB: state <= S_FETCH;
                 S_MEMADR: begin
