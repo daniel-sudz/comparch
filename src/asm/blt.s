@@ -1,31 +1,29 @@
-Usage:
- ./rv32_simulator +initial_memory=path/to/memh/file
-  Additional arguments:
-    +initial_memory=path/to/memh/file
-        Required: path to a memh file that containes the assembled binary to run.
-    +max_cycles=NUMBER_OF_CYCLES_TO_RUN
-    +wave_fn=path/to/wave/file
-        default is rv32_simulator.fst
-    +final_memory=path/to/memh/file
-        If provided, the final memory contents will be saved here. Use this to debug your store instructions.
-WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/itypes.memh): Not enough words in the file for the requested range [0:1023].
-Running simulation of memory ../asm/out/itypes.memh for up to       10000 cycles. Waves will be stored to rv32_simulator.fst.
-FST info: dumpfile rv32_simulator.fst opened for output.
-Ran       10000 cycles, finishing.
+addi  x1, x0, 5             # x01 = 5
+
+addi    x2, x0, 0           # x02 = 0
+loop_head:
+addi    x2, x2, 1           # x02 ++
+blt     x2, x1, loop_head
+beq     x0, x0, trap
+                            # x02 = 5
+
+trap:
+
+
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x01, ra = 0x00000011 (        17)|
-#TESTASSERTOUTPUT|      x02, sp = 0x00000110 (       272)|
-#TESTASSERTOUTPUT|      x03, gp = 0x00000001 (         1)|
-#TESTASSERTOUTPUT|      x04, tp = 0x00000001 (         1)|
-#TESTASSERTOUTPUT|      x05, t0 = 0x000000cf (       207)|
-#TESTASSERTOUTPUT|      x06, t1 = 0x0fffffff ( 268435455)|
-#TESTASSERTOUTPUT|      x07, t2 = 0xffffffff (        -1)|
-#TESTASSERTOUTPUT|      x08, s0 = 0x000007fc (      2044)|
-#TESTASSERTOUTPUT|      x09, s1 = 0x00000064 (       100)|
-#TESTASSERTOUTPUT|      x10, a0 = 0xfffffff0 (       -16)|
+#TESTASSERTOUTPUT|      x01, ra = 0x00000005 (         5)|
+#TESTASSERTOUTPUT|      x02, sp = 0x00000005 (         5)|
+#TESTASSERTOUTPUT|      x03, gp = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x04, tp = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x05, t0 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x06, t1 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x07, t2 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x08, s0 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x09, s1 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x10, a0 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x11, a1 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x12, a2 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x13, a3 = 0x00000000 (         0)|

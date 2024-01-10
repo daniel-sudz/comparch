@@ -1,0 +1,5 @@
+00500093 // PC=0x0 line=1: addi  x1, x0, 5             # x01 = 5
+00000113 // PC=0x4 line=3: addi    x2, x0, 0           # x02 = 0
+00110113 // PC=0x8 line=5: addi    x2, x2, 1           # x02 ++
+fe114ee3 // PC=0xc line=6: blt     x2, x1, loop_head_blt
+00000263 // PC=0x10 line=7: beq     x0, x0, trap
