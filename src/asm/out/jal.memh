@@ -1,0 +1,4 @@
+00c000ef // PC=0x0 line=1: jal x1, jump      # x01 = 4
+00a08093 // PC=0x4 line=3: addi x1, x1, 10   # x1 += 10
+00000463 // PC=0x8 line=4: beq x0, x0, trap  # halt
+000080e7 // PC=0xc line=7: jalr x1, x1, 0    # x1 = 20, jump to addi
