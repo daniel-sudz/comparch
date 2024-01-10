@@ -35,7 +35,7 @@ module rv32i_multicycle_core(
         S_ALUWB = 6, 
         S_MEMWRITE = 7,
         S_BRANCH = 8,
-        S_JAL = 9
+        S_JALR = 9
     } state;
 
     /* ---------------------- Standard Control Signals ---------------------- */
@@ -70,7 +70,8 @@ module rv32i_multicycle_core(
             `OP_IMMEDIATE_I_EXECUTE, `OP_I_LOAD: extended_immediate = {{20{IR[31]}}, IR[31:20]};
             `OP_I_STORE:                         extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
             `OP_BRANCH:                          extended_immediate = {{19{IR[31]}}, IR[31], IR[7], IR[30:25], IR[11:8], 1'b0};
-            `OP_JAL, `OP_JALR:                   extended_immediate = {{11{IR[31]}}, IR[31], IR[19:12], IR[20], IR[30:21], 1'b0};
+            `OP_JAL:                             extended_immediate = {{11{IR[31]}}, IR[31], IR[19:12], IR[20], IR[30:21], 1'b0};
+            `OP_JALR:                            extended_immediate = {{20{IR[31]}}, IR[31:20]};
             `OP_U_IPC, `OP_U_LUI:                extended_immediate = {IR[31:12], 12'b0};
         endcase
     end
@@ -395,16 +396,31 @@ module rv32i_multicycle_core(
                             alu_src_a = ALU_SRC_A_OLD_PC;
                             alu_src_b = ALU_SRC_B_IMM;
                         end
-                        `OP_JALR: begin
-                            alu_src_a = ALU_SRC_A_RF;
-                            alu_src_b = ALU_SRC_B_IMM;
-                        end
                     endcase
                 end
         endcase
     end
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              DATAPATH for decode / branch target (end)                             */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for JALR (start)                                             */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    always_comb begin: datapath_jalr
+        case(state)
+            // for jalr we need one more cycle to go to the register file compared to jal which can just straight jump
+            S_JALR: begin
+                set_default;
+                alu_control = ALU_ADD;
+                alu_last_ena = 1;
+                alu_src_a = ALU_SRC_A_RF;
+                alu_src_b = ALU_SRC_B_IMM;
+            end
+        endcase
+    end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for JALR (end)                                               */
     /* -------------------------------------------------------------------------------------------------------------------*/
      
     /* -------------------------------------------------------------------------------------------------------------------*/
@@ -481,10 +497,11 @@ module rv32i_multicycle_core(
                         `OP_R_EXECUTE: state <= S_EXECUTE_RI;
                         `OP_BRANCH: state <= S_BRANCH;
                         `OP_JAL: state <= S_ALUWB;
-                        `OP_JALR: state <= S_ALUWB;
+                        `OP_JALR: state <= S_JALR;
                     endcase
                 end
                 S_EXECUTE_RI: state <= S_ALUWB;
+                S_JALR : state <= S_ALUWB;
                 S_ALUWB: state <= S_FETCH;
                 S_MEMADR: begin
                     case(op)

@@ -105,9 +105,11 @@ rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
 %.validate: %.result
 	node ../asm/validate.js $(basename $<).s test/$< 
 
+test_rv32_ir_types: addi.validate itypes.validate irtypes.validate
 test_rv32_branch: beq.validate bne.validate blt.validate bge.validate bgeu.validate bltu.validate
+test_rv32_jal: jal_jalr.validate
 
-test_rv32_all: itypes.validate irtypes.validate storeload.validate test_rv32_branch
+test_rv32_all: test_rv32_ir_types storeload.validate test_rv32_branch test_rv32_jal
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Instruction Type Tests
