@@ -12,7 +12,7 @@ module test_register_file;
 
 
     logic [4:0] wr_addr;
-    logic [31:0] wr_data;
+    logic [31:0] wr_data, wr_data_gen;
 
     logic[4:0] rd_addr0, rd_addr1;
     logic[31:0] rd_data0, rd_data1;
@@ -41,19 +41,25 @@ module test_register_file;
                 @(negedge clk);
                 wr_ena = 1;
                 wr_addr = i;
-                wr_data = $random();
-                #5; 
+                wr_data_gen = $random();
+                wr_data = wr_data_gen;
+                #1; 
                 @(posedge clk);
 
+                // read from register
                 wr_ena = 0;
                 rd_addr0 = i;
                 rd_addr1 = i;
+
+                // test to make sure enable works correctly
+                wr_data = $random();
+
                 #5;
 
                 // check value of register
                 $display("[register_file]: [rd_addr0: %0d], [rd_data0: %0d], [rd_addr1: %0d], [rd_data1: %0d], [exp_rd_data0: %0d]", rd_addr0, rd_data1, rd_addr1, rd_data1, wr_data);
-                assert(wr_data == rd_data0) else $fatal;
-                assert(wr_data == rd_data1) else $fatal;
+                assert(wr_data_gen == rd_data0) else $fatal;
+                assert(wr_data_gen == rd_data1) else $fatal;
                 
             end
             $display("[PASS RANDOM TEST] iteration #%d", test_cases);
