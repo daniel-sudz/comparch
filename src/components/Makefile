@@ -105,7 +105,7 @@ rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
 %.validate: %.result
 	node ../asm/validate.js $(basename $<).s test/$< 
 
-test_rv32_branch: beq.validate bne.validate
+test_rv32_branch: beq.validate bne.validate blt.validate bge.validate bgeu.validate bltu.validate
 
 test_rv32_all: itypes.validate irtypes.validate storeload.validate test_rv32_branch
 

@@ -1,19 +1,20 @@
-addi  x1, x0, 5             # x01 = 5
+addi  x1, x0, 6             # x01 = 6
 
-addi    x2, x0, 0           # x02 = 0
+addi    x2, x0, 10          # x02 = 10
 loop_head:
-addi    x2, x2, 1           # x02 ++
-bne     x2, x1, loop_head
+addi    x2, x2, -1          # x02--
+bge     x2, x1, loop_head
 beq     x0, x0, trap
                             # x02 = 5
 
 trap:
 
+
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x01, ra = 0x00000005 (         5)|
+#TESTASSERTOUTPUT|      x01, ra = 0x00000006 (         6)|
 #TESTASSERTOUTPUT|      x02, sp = 0x00000005 (         5)|
 #TESTASSERTOUTPUT|      x03, gp = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x04, tp = 0x00000000 (         0)|

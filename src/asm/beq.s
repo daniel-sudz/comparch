@@ -1,10 +1,10 @@
 addi  x1, x0, 5            # x01 = 5
 
 addi    x2, x0, 0           # x02 = 0
-loop_head_beq:
+loop_head:
 addi    x2, x2, 1           # x02 ++
 beq     x2, x1, trap
-beq     x0, x0, loop_head_beq
+beq     x0, x0, loop_head
                             # x02 = 5
 
 trap:

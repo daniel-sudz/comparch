@@ -3,11 +3,12 @@ addi  x1, x0, 5             # x01 = 5
 addi    x2, x0, 0           # x02 = 0
 loop_head:
 addi    x2, x2, 1           # x02 ++
-bne     x2, x1, loop_head
+bltu    x2, x1, loop_head
 beq     x0, x0, trap
                             # x02 = 5
 
 trap:
+
 
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |

@@ -1,19 +1,22 @@
-addi  x1, x0, 5             # x01 = 5
-
-addi    x2, x0, 0           # x02 = 0
-loop_head:
-addi    x2, x2, 1           # x02 ++
-bne     x2, x1, loop_head
-beq     x0, x0, trap
-                            # x02 = 5
-
-trap:
-
+Usage:
+ ./rv32_simulator +initial_memory=path/to/memh/file
+  Additional arguments:
+    +initial_memory=path/to/memh/file
+        Required: path to a memh file that containes the assembled binary to run.
+    +max_cycles=NUMBER_OF_CYCLES_TO_RUN
+    +wave_fn=path/to/wave/file
+        default is rv32_simulator.fst
+    +final_memory=path/to/memh/file
+        If provided, the final memory contents will be saved here. Use this to debug your store instructions.
+WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/bgeu.memh): Not enough words in the file for the requested range [0:1023].
+Running simulation of memory ../asm/out/bgeu.memh for up to       10000 cycles. Waves will be stored to rv32_simulator.fst.
+FST info: dumpfile rv32_simulator.fst opened for output.
+Ran       10000 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x01, ra = 0x00000005 (         5)|
+#TESTASSERTOUTPUT|      x01, ra = 0x00000006 (         6)|
 #TESTASSERTOUTPUT|      x02, sp = 0x00000005 (         5)|
 #TESTASSERTOUTPUT|      x03, gp = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x04, tp = 0x00000000 (         0)|
