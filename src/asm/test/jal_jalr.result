@@ -8,8 +8,8 @@ Usage:
         default is rv32_simulator.fst
     +final_memory=path/to/memh/file
         If provided, the final memory contents will be saved here. Use this to debug your store instructions.
-WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/jal.memh): Not enough words in the file for the requested range [0:1023].
-Running simulation of memory ../asm/out/jal.memh for up to       10000 cycles. Waves will be stored to rv32_simulator.fst.
+WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/jal_jalr.memh): Not enough words in the file for the requested range [0:1023].
+Running simulation of memory ../asm/out/jal_jalr.memh for up to       10000 cycles. Waves will be stored to rv32_simulator.fst.
 FST info: dumpfile rv32_simulator.fst opened for output.
 Ran       10000 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|

@@ -70,7 +70,8 @@ module rv32i_multicycle_core(
             `OP_IMMEDIATE_I_EXECUTE, `OP_I_LOAD: extended_immediate = {{20{IR[31]}}, IR[31:20]};
             `OP_I_STORE:                         extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
             `OP_BRANCH:                          extended_immediate = {{19{IR[31]}}, IR[31], IR[7], IR[30:25], IR[11:8], 1'b0};
-            `OP_JAL, `OP_JALR:                   extended_immediate = {{11{IR[31]}}, IR[31], IR[19:12], IR[20], IR[30:21], 1'b0};
+            `OP_JAL:                             extended_immediate = {{11{IR[31]}}, IR[31], IR[19:12], IR[20], IR[30:21], 1'b0};
+            `OP_JALR:                            extended_immediate = {{20{IR[31]}}, IR[31:20]};
             `OP_U_IPC, `OP_U_LUI:                extended_immediate = {IR[31:12], 12'b0};
         endcase
     end

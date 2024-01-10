@@ -2,4 +2,4 @@
 00000113 // PC=0x4 line=3: addi    x2, x0, 0           # x02 = 0
 00110113 // PC=0x8 line=5: addi    x2, x2, 1           # x02 ++
 00110463 // PC=0xc line=6: beq     x2, x1, trap
-fe000ce3 // PC=0x10 line=7: beq     x0, x0, loop_head_beq
+fe000ce3 // PC=0x10 line=7: beq     x0, x0, loop_head
