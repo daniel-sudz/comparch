@@ -1,7 +1,17 @@
+Usage:
+ ./rv32_simulator +initial_memory=path/to/memh/file
+  Additional arguments:
+    +initial_memory=path/to/memh/file
+        Required: path to a memh file that containes the assembled binary to run.
+    +max_cycles=NUMBER_OF_CYCLES_TO_RUN
+    +wave_fn=path/to/wave/file
+        default is rv32_simulator.fst
+    +final_memory=path/to/memh/file
+        If provided, the final memory contents will be saved here. Use this to debug your store instructions.
 WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/storeload.memh): Not enough words in the file for the requested range [0:1023].
-Running simulation of memory ../asm/out/storeload.memh for up to         100 cycles. Waves will be stored to rv32_simulator.fst.
+Running simulation of memory ../asm/out/storeload.memh for up to       10000 cycles. Waves will be stored to rv32_simulator.fst.
 FST info: dumpfile rv32_simulator.fst opened for output.
-Ran         100 cycles, finishing.
+Ran       10000 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
