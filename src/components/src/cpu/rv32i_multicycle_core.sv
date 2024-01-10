@@ -8,10 +8,10 @@
 `include "memory_map.sv" 
 
 module rv32i_multicycle_core(
-    clk, rst, ena,
-    mem_addr, mem_rd_data, mem_wr_data, mem_wr_ena,
-    mem_access, mem_exception,
-    PC, instructions_completed, instruction_done
+        clk, rst, ena,
+        mem_addr, mem_rd_data, mem_wr_data, mem_wr_ena,
+        mem_access, mem_exception,
+        PC, instructions_completed, instruction_done
     );
 
     `define OP_IMMEDIATE_I_EXECUTE 7'b0010011
@@ -19,6 +19,10 @@ module rv32i_multicycle_core(
     `define OP_R_EXECUTE 7'b0110011
     `define OP_I_STORE 7'b0100011
     `define OP_BRANCH 7'b1100011
+    `define OP_JAL 7'b1101111
+    `define OP_JALR 7'b1100111
+    `define OP_U_IPC 7'b0010111
+    `define OP_U_LUI 7'b0110111
     
     /* enum values assigned for debug purposes. Sync them with the gtkwave folder */
     enum logic [3:0] {
@@ -30,7 +34,8 @@ module rv32i_multicycle_core(
         S_EXECUTE_RI = 5, 
         S_ALUWB = 6, 
         S_MEMWRITE = 7,
-        S_BRANCH = 8
+        S_BRANCH = 8,
+        S_JAL = 9
     } state;
 
     /* ---------------------- Standard Control Signals ---------------------- */
@@ -53,8 +58,6 @@ module rv32i_multicycle_core(
     logic [4:0] rd, rs1, rs2;
     logic [31:0] extended_immediate;
 
-    enum logic[3:0] {rtype, itype, ltype, stype, btype, jtype} instruction_type;
-
     always_comb op = IR[6:0];
     always_comb funct3 = IR[14:12];
     always_comb funct7 = IR[31:25];
@@ -62,19 +65,13 @@ module rv32i_multicycle_core(
     always_comb rs1 = IR[19:15];
     always_comb rs2 = IR[24:20];
 
-    always_comb begin : instruction_type_decoder
-        case(op) 
-            `OP_I_LOAD: instruction_type = itype;
-            `OP_IMMEDIATE_I_EXECUTE: instruction_type = itype;
-            `OP_R_EXECUTE: instruction_type = rtype;
-            `OP_I_STORE: instruction_type = stype;
-        endcase
-    end
-
     always_comb begin : extended_immediate_decoder
-        case(instruction_type)
-            itype: extended_immediate = {{20{IR[31]}}, IR[31:20]};
-            stype: extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
+        case(op)
+            `OP_IMMEDIATE_I_EXECUTE, `OP_I_LOAD: extended_immediate = {{20{IR[31]}}, IR[31:20]};
+            `OP_I_STORE:                         extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
+            `OP_BRANCH:                          extended_immediate = {{19{IR[31]}}, IR[31], IR[7], IR[30:25], IR[11:8], 1'b0};
+            `OP_JAL, `OP_JALR:                   extended_immediate = {{11{IR[31]}}, IR[31], IR[19:12], IR[20], IR[30:21], 1'b0};
+            `OP_U_IPC, `OP_U_LUI:                extended_immediate = {IR[31:12], 12'b0};
         endcase
     end
     /* -------------------------------------------------------------------------------------------------------------------*/
@@ -125,7 +122,7 @@ module rv32i_multicycle_core(
     
 
     /* ---------------------- Result SRC Signals ---------------------- */
-    enum logic [1:0] {RESULT_SRC_ALU, RESULT_SRC_MEM_DATA, RESULT_SRC_ALU_LAST} result_src; 
+    enum logic [1:0] {RESULT_SRC_ALU, RESULT_SRC_MEM_DATA, RESULT_SRC_ALU_LAST, RESULT_SRC_PC_NEXT_INSTRUCTION} result_src; 
     logic [31:0] result;
 
     always_comb begin : result_signals
@@ -133,6 +130,7 @@ module rv32i_multicycle_core(
             RESULT_SRC_ALU: result = alu_result;
             RESULT_SRC_MEM_DATA: result = mem_data;
             RESULT_SRC_ALU_LAST: result = alu_last;
+            RESULT_SRC_PC_NEXT_INSTRUCTION: result = PC_next_instruction;
         endcase
     end
 
@@ -224,6 +222,7 @@ module rv32i_multicycle_core(
             alu_last_ena = 0;
             mem_data_ena = 0;
             mem_wr_ena = 0;
+            reg_write = 0;
     endtask
  
     /* -------------------------------------------------------------------------------------------------------------------*/
@@ -252,14 +251,6 @@ module rv32i_multicycle_core(
                 alu_src_b = ALU_SRC_B_4;
                 PC_old_ena = 1;
                 PC_next_instruction_ena = 1;
-            end
-            // use the alu in this phase to compute jump target if needed
-            S_DECODE: begin
-                set_default;
-                alu_control = ALU_ADD;
-                alu_src_a = ALU_SRC_A_OLD_PC;
-                alu_src_b = ALU_SRC_B_IMM;
-                alu_last_ena = 1;
             end
             // LOAD INSTRUCTION compute offset
             S_MEMADR: begin 
@@ -348,26 +339,80 @@ module rv32i_multicycle_core(
                     end
                 endcase
             end
-            S_ALUWB: begin
-                set_default;
-                result_src = RESULT_SRC_ALU_LAST;
-                reg_write = 1;
-                PC_ena = 1;
-                pc_next_src = PC_NEXT_INSTRUCTION;
-            end
+
         endcase 
     end
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              DATAPATH for RI (end)                                                 */
     /* -------------------------------------------------------------------------------------------------------------------*/
+    
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for ALU WB (begin)                                           */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    always_comb begin: datapath_aluwb
+        case(state)
+            S_ALUWB: begin
+                set_default;
+                reg_write = 1;
+                PC_ena = 1;
+                case(op) 
+                    `OP_R_EXECUTE, `OP_IMMEDIATE_I_EXECUTE: begin
+                        result_src = RESULT_SRC_ALU_LAST;
+                        pc_next_src = PC_NEXT_INSTRUCTION;
+                    end
+                    `OP_JAL: begin
+                        result_src = RESULT_SRC_PC_NEXT_INSTRUCTION;
+                        pc_next_src = PC_NEXT_JUMP;
+                    end
+                    `OP_JALR: begin
+                        result_src = RESULT_SRC_PC_NEXT_INSTRUCTION;
+                        pc_next_src = PC_NEXT_JUMP;
+                    end
+                endcase
+            end
+        endcase
+    end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for ALU WB (end)                                             */
+    /* -------------------------------------------------------------------------------------------------------------------*/
 
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for decode / branch target (begin)                           */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    always_comb begin: datapath_decode
+        case(state)
+                // use the alu in this phase to compute jump target if needed
+                S_DECODE: begin
+                    set_default;
+                    alu_control = ALU_ADD;
+                    alu_last_ena = 1;
+                    case(op)
+                        `OP_BRANCH: begin
+                            alu_src_a = ALU_SRC_A_OLD_PC;
+                            alu_src_b = ALU_SRC_B_IMM;
+                        end
+                        `OP_JAL: begin
+                            alu_src_a = ALU_SRC_A_OLD_PC;
+                            alu_src_b = ALU_SRC_B_IMM;
+                        end
+                        `OP_JALR: begin
+                            alu_src_a = ALU_SRC_A_RF;
+                            alu_src_b = ALU_SRC_B_IMM;
+                        end
+                    endcase
+                end
+        endcase
+    end
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              DATAPATH for decode / branch target (end)                             */
+    /* -------------------------------------------------------------------------------------------------------------------*/
      
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              DATAPATH for branch (begin)                                           */
     /* -------------------------------------------------------------------------------------------------------------------*/
     logic will_jump;
     always_comb begin: datapath_branch
-        case(op)
+        case(state)
             S_BRANCH: begin
                 set_default;
                 alu_src_a = ALU_SRC_A_RF;
@@ -402,14 +447,18 @@ module rv32i_multicycle_core(
                         will_jump = ~alu_result[0];
                     end     
                 endcase
-            end
+                PC_ena = 1;
+                case(will_jump)
+                        1'b0: begin
+                            pc_next_src = PC_NEXT_INSTRUCTION;
+                        end
+                        1'b1: begin
+                            pc_next_src = PC_NEXT_JUMP;
+                        end
+                endcase
+                end
         endcase
-        case(will_jump)
-            1'b1: begin
-                pc_next_src = PC_NEXT_JUMP;
-                result_src = RESULT_SRC_ALU_LAST;
-            end
-        endcase
+ 
     end
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              DATAPATH for branch (end)                                             */
@@ -431,6 +480,8 @@ module rv32i_multicycle_core(
                         `OP_IMMEDIATE_I_EXECUTE: state <= S_EXECUTE_RI;
                         `OP_R_EXECUTE: state <= S_EXECUTE_RI;
                         `OP_BRANCH: state <= S_BRANCH;
+                        `OP_JAL: state <= S_ALUWB;
+                        `OP_JALR: state <= S_ALUWB;
                     endcase
                 end
                 S_EXECUTE_RI: state <= S_ALUWB;
@@ -444,6 +495,7 @@ module rv32i_multicycle_core(
                 S_MEMREAD: state <= S_MEMWB;
                 S_MEMWB: state <= S_FETCH;
                 S_MEMWRITE: state <= S_FETCH;
+                S_BRANCH: state <= S_FETCH;
             endcase 
         end
     end
