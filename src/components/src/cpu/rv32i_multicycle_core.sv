@@ -8,10 +8,10 @@
 `include "memory_map.sv" 
 
 module rv32i_multicycle_core(
-    clk, rst, ena,
-    mem_addr, mem_rd_data, mem_wr_data, mem_wr_ena,
-    mem_access, mem_exception,
-    PC, instructions_completed, instruction_done
+        clk, rst, ena,
+        mem_addr, mem_rd_data, mem_wr_data, mem_wr_ena,
+        mem_access, mem_exception,
+        PC, instructions_completed, instruction_done
     );
 
     `define OP_IMMEDIATE_I_EXECUTE 7'b0010011
@@ -21,6 +21,8 @@ module rv32i_multicycle_core(
     `define OP_BRANCH 7'b1100011
     `define OP_JAL 7'b1101111
     `define OP_JALR 7'b1100111
+    `define OP_U_IPC 7'b0010111
+    `define OP_U_LUI 7'b0110111
     
     /* enum values assigned for debug purposes. Sync them with the gtkwave folder */
     enum logic [3:0] {
@@ -56,8 +58,6 @@ module rv32i_multicycle_core(
     logic [4:0] rd, rs1, rs2;
     logic [31:0] extended_immediate;
 
-    enum logic[3:0] {rtype, itype, ltype, stype, btype, jtype} instruction_type;
-
     always_comb op = IR[6:0];
     always_comb funct3 = IR[14:12];
     always_comb funct7 = IR[31:25];
@@ -65,19 +65,13 @@ module rv32i_multicycle_core(
     always_comb rs1 = IR[19:15];
     always_comb rs2 = IR[24:20];
 
-    always_comb begin : instruction_type_decoder
-        case(op) 
-            `OP_I_LOAD: instruction_type = itype;
-            `OP_IMMEDIATE_I_EXECUTE: instruction_type = itype;
-            `OP_R_EXECUTE: instruction_type = rtype;
-            `OP_I_STORE: instruction_type = stype;
-        endcase
-    end
-
     always_comb begin : extended_immediate_decoder
-        case(instruction_type)
-            itype: extended_immediate = {{20{IR[31]}}, IR[31:20]};
-            stype: extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
+        case(op)
+            `OP_IMMEDIATE_I_EXECUTE, `OP_I_LOAD: extended_immediate = {{20{IR[31]}}, IR[31:20]};
+            `OP_I_STORE:                         extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
+            `OP_BRANCH:                          extended_immediate = {{19{IR[31]}}, IR[31], IR[7], IR[30:25], IR[11:6], 1'b0};
+            `OP_JAL, `OP_JALR:                   extended_immediate = {{11{IR[31]}}, IR[31], IR[19:12], IR[20], IR[30:21], 1'b0};
+            `OP_U_IPC, `OP_U_LUI:                extended_immediate = {IR[31:12], 12'b0};
         endcase
     end
     /* -------------------------------------------------------------------------------------------------------------------*/
