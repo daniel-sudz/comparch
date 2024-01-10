@@ -1,19 +1,29 @@
+Usage:
+ ./rv32_simulator +initial_memory=path/to/memh/file
+  Additional arguments:
+    +initial_memory=path/to/memh/file
+        Required: path to a memh file that containes the assembled binary to run.
+    +max_cycles=NUMBER_OF_CYCLES_TO_RUN
+    +wave_fn=path/to/wave/file
+        default is rv32_simulator.fst
+    +final_memory=path/to/memh/file
+        If provided, the final memory contents will be saved here. Use this to debug your store instructions.
 WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/beq.memh): Not enough words in the file for the requested range [0:1023].
-Running simulation of memory ../asm/out/beq.memh for up to         100 cycles. Waves will be stored to rv32_simulator.fst.
+Running simulation of memory ../asm/out/beq.memh for up to       10000 cycles. Waves will be stored to rv32_simulator.fst.
 FST info: dumpfile rv32_simulator.fst opened for output.
-Ran         100 cycles, finishing.
+Ran       10000 cycles, finishing.
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x01, ra = 0x00000032 (        50)|
-#TESTASSERTOUTPUT|      x02, sp = 0x00000001 (         1)|
+#TESTASSERTOUTPUT|      x01, ra = 0x00000005 (         5)|
+#TESTASSERTOUTPUT|      x02, sp = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x03, gp = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x04, tp = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x05, t0 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x06, t1 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x07, t2 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x08, s0 = 0x0000002a (        42)|
+#TESTASSERTOUTPUT|      x08, s0 = 0x00000008 (         8)|
 #TESTASSERTOUTPUT|      x09, s1 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x10, a0 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x11, a1 = 0x00000000 (         0)|
@@ -30,7 +40,7 @@ Ran         100 cycles, finishing.
 #TESTASSERTOUTPUT|      x22, s6 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x23, s7 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x24, s8 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x25, s9 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x25, s9 = 0x00000008 (         8)|
 #TESTASSERTOUTPUT|     x26, s10 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|     x27, s11 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x28, t3 = 0x00000000 (         0)|

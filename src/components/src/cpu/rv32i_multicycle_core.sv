@@ -69,7 +69,7 @@ module rv32i_multicycle_core(
         case(op)
             `OP_IMMEDIATE_I_EXECUTE, `OP_I_LOAD: extended_immediate = {{20{IR[31]}}, IR[31:20]};
             `OP_I_STORE:                         extended_immediate = {{20{IR[31]}}, IR[31:25], IR[11:7]};
-            `OP_BRANCH:                          extended_immediate = {{19{IR[31]}}, IR[31], IR[7], IR[30:25], IR[11:6], 1'b0};
+            `OP_BRANCH:                          extended_immediate = {{19{IR[31]}}, IR[31], IR[7], IR[30:25], IR[11:8], 1'b0};
             `OP_JAL, `OP_JALR:                   extended_immediate = {{11{IR[31]}}, IR[31], IR[19:12], IR[20], IR[30:21], 1'b0};
             `OP_U_IPC, `OP_U_LUI:                extended_immediate = {IR[31:12], 12'b0};
         endcase
@@ -222,6 +222,7 @@ module rv32i_multicycle_core(
             alu_last_ena = 0;
             mem_data_ena = 0;
             mem_wr_ena = 0;
+            reg_write = 0;
     endtask
  
     /* -------------------------------------------------------------------------------------------------------------------*/
@@ -411,7 +412,7 @@ module rv32i_multicycle_core(
     /* -------------------------------------------------------------------------------------------------------------------*/
     logic will_jump;
     always_comb begin: datapath_branch
-        case(op)
+        case(state)
             S_BRANCH: begin
                 set_default;
                 alu_src_a = ALU_SRC_A_RF;
@@ -446,14 +447,18 @@ module rv32i_multicycle_core(
                         will_jump = ~alu_result[0];
                     end     
                 endcase
-            end
-        endcase
-        case(will_jump)
-            1'b1: begin
-                pc_next_src = PC_NEXT_JUMP;
                 PC_ena = 1;
-            end
+                case(will_jump)
+                        1'b0: begin
+                            pc_next_src = PC_NEXT_INSTRUCTION;
+                        end
+                        1'b1: begin
+                            pc_next_src = PC_NEXT_JUMP;
+                        end
+                endcase
+                end
         endcase
+ 
     end
     /* -------------------------------------------------------------------------------------------------------------------*/
     /*                                              DATAPATH for branch (end)                                             */
@@ -490,6 +495,7 @@ module rv32i_multicycle_core(
                 S_MEMREAD: state <= S_MEMWB;
                 S_MEMWB: state <= S_FETCH;
                 S_MEMWRITE: state <= S_FETCH;
+                S_BRANCH: state <= S_FETCH;
             endcase 
         end
     end

@@ -99,7 +99,7 @@ rv32_simulator: tests/provided/rv32_simulator.sv src/**/*.sv
 
 # Runs the assembled .memh files through the simulator and writes out the register file state
 %.result: %.memh rv32_simulator
-	./rv32_simulator.bin +initial_memory=../asm/out/$< ${VVP_POST} 2>&1 | tee ../asm/test/$(basename $<).result
+	./rv32_simulator.bin +max_cycles=10000 +initial_memory=../asm/out/$< ${VVP_POST} 2>&1 | tee ../asm/test/$(basename $<).result
 
 # Validates that the simulator output is as expected
 %.validate: %.result

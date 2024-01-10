@@ -1,8 +1,9 @@
-addi  x1, x0, 50            # x01 = 50
+addi  x1, x0, 5            # x01 = 5
 
+addi    x8, x0, 0           # x08 = 0
 loop_head:
-addi    x2, x2, 1           # x02 ++
-beq     x2, x1, loop_end
+addi    x8, x8, 1           # x08 ++
+beq     x8, x1, loop_end
 beq     x0, x0, loop_head
 loop_end:
-                            # x02 = 50
+                            # x08 = 5
