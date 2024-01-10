@@ -52,7 +52,7 @@ module register_file(rst, clk, wr_ena, wr_addr, wr_data, rd_addr0, rd_data0, rd_
         for(i=1;i<32;i++) begin
             register #(32) REG(
                 .clk(clk), 
-                .ena(write_addr_decoded[i]), 
+                .ena(write_addr_decoded[i] & wr_ena), 
                 .rst(rst), 
                 .d(wr_data),
                 .q(xn[i]));
