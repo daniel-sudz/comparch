@@ -266,8 +266,8 @@ module rv32i_multicycle_core(
         // mem_access is set the same for store/load during S_MEMREAD and S_MEMWRITE phases
         // special case for S_FETCH below where it swaps to MEM_ACCESS_WORD
         case(funct3)
-            3'b000: mem_access = MEM_ACCESS_BYTE;
-            3'b001: mem_access = MEM_ACCESS_HALF;
+            3'b000, 3'b100: mem_access = MEM_ACCESS_BYTE;
+            3'b001, 3'b101: mem_access = MEM_ACCESS_HALF;
             3'b010: mem_access = MEM_ACCESS_WORD;
         endcase
 
