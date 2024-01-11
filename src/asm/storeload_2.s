@@ -1,19 +1,24 @@
-addi  x1, x0, 1040             # x01 = 1040 (16 + 1024)
+addi  x1, x0, 255              # x01 = 255 (32'b00000000000000000000000011111111)
 addi  x2, x0, 1024             # x02 = 1024 
-sb  x1, 0(x2)                  # (MEM:1024) = 16
-lb  x3, 0(x2)                  # x03 = 16
+sw  x1, 0(x2)                  # (MEM:1024) = 255 (32'b00000000000000000000000011111111)
+lb  x3, 0(x2)                  # x03 = -1 (32'b11111111111111111111111111111111)
+lh  x4, 0(x2)                  # x04 = 255 (32'b00000000000000000000000011111111)
+lw  x5, 0(x2)                  # x05 = 255 (32'b00000000000000000000000011111111)
+lbu x6, 0(x2)                  # x06 = 255 (32'b00000000000000000000000011111111)
+lhu x7, 0(x2)                  # x07 = 255 (32'b00000000000000000000000011111111)
+
 
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x01, ra = 0x00000410 (      1040)|
+#TESTASSERTOUTPUT|      x01, ra = 0x000000ff (       255)|
 #TESTASSERTOUTPUT|      x02, sp = 0x00000400 (      1024)|
-#TESTASSERTOUTPUT|      x03, gp = 0x00000010 (        16)|
-#TESTASSERTOUTPUT|      x04, tp = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x05, t0 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x06, t1 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x07, t2 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x03, gp = 0xffffffff (        -1)|
+#TESTASSERTOUTPUT|      x04, tp = 0x000000ff (       255)|
+#TESTASSERTOUTPUT|      x05, t0 = 0x000000ff (       255)|
+#TESTASSERTOUTPUT|      x06, t1 = 0x000000ff (       255)|
+#TESTASSERTOUTPUT|      x07, t2 = 0x000000ff (       255)|
 #TESTASSERTOUTPUT|      x08, s0 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x09, s1 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x10, a0 = 0x00000000 (         0)|
