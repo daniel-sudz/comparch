@@ -1,0 +1,57 @@
+fff00093 // PC=0x0 line=3: addi  x1, x0, -1   # x01 = -1
+02300113 // PC=0x4 line=4: addi  x2, x0, 35   # x02 = 35
+00d08de7 // PC=0x8 line=5: jalr   x27,x1,13
+04414193 // PC=0xc line=6: xori  x3, x2, 68   # x03 = 103
+01116213 // PC=0x10 line=7: ori   x4, x2, 17   # x04 = 51
+01117293 // PC=0x14 line=8: andi  x5, x2, 17   # x05 = 1
+00809313 // PC=0x18 line=9: slli  x6, x1, 8    # x06 = -256
+0021d393 // PC=0x1c line=10: srli  x7, x3, 2    # x07 = 25
+40635413 // PC=0x20 line=11: srai  x8, x6, 6    # x08 = -4
+0230a493 // PC=0x24 line=12: slti  x9, x1, 35   # x09 = 1
+0230b513 // PC=0x28 line=13: sltiu x10, x1, 35  # x10 = 0
+001085b3 // PC=0x2c line=14: add   x11, x1, x1  # x11 = -2
+40108633 // PC=0x30 line=15: sub   x12, x1, x1  # x12 = 0
+00c0c6b3 // PC=0x34 line=16: xor   x13, x1, x12 # x13 = -1
+00316733 // PC=0x38 line=17: or    x14, x2, x3  # x14 = 103
+003177b3 // PC=0x3c line=18: and   x15, x2, x3  # x15 = 35
+00400813 // PC=0x40 line=19: addi  x16, x0, 4   # x16 = 4
+010118b3 // PC=0x44 line=20: sll   x17, x2, x16 # x17 = 560
+0101d933 // PC=0x48 line=21: srl   x18, x3, x16 # x18 = 6
+410359b3 // PC=0x4c line=22: sra   x19, x6, x16 # x19 = -16
+0020aa33 // PC=0x50 line=23: slt   x20, x1, x2  # x20 = 1
+0020bab3 // PC=0x54 line=24: sltu  x21, x1, x2  # x20 = 0
+002b0663 // PC=0x58 line=26: beq     x22, x2, loop_end
+001b0b13 // PC=0x5c line=27: addi    x22, x22, 1
+ff9ffe6f // PC=0x60 line=28: jal		x28, loop_head
+1a4e8e93 // PC=0x64 line=30: addi    x29, x29, 420
+fffb8b93 // PC=0x68 line=32: addi    x23, x23, -1
+fe8b9ee3 // PC=0x6c line=33: bne     x23, x8, loop_head2
+045f0f13 // PC=0x70 line=34: addi    x30, x30, 69
+01802f83 // PC=0x74 line=35: lw      x31, 24(x0)     #8426259
+2fe02c23 // PC=0x78 line=36: sw      x30, 760(x0)    #69
+3089ad03 // PC=0x7c line=37: lw      x26, 776(x19)   #69
+ffd8a823 // PC=0x80 line=38: sw      x29, -16(x17)   #420
+23000023 // PC=0x84 line=39: sb      x16, 544(x0)    #4
+22002c83 // PC=0x88 line=40: lw      x25, 544(x0)    #260
+07fe9f23 // PC=0x8c line=41: sh      x31, 126(x29)   #37651
+32032c03 // PC=0x90 line=42: lw      x24, 800(x6)    #-1827471100
+32330403 // PC=0x94 line=44: lb      x8,  803(x6)    #-109
+32334483 // PC=0x98 line=45: lbu     x9,  803(x6)    #147
+32231503 // PC=0x9c line=46: lh      x10,  802(x6)    #-27885
+32235583 // PC=0xa0 line=47: lhu     x11,  802(x6)    #37651
+00534463 // PC=0xa4 line=49: blt     x6, x5, add_one   #test -256<1
+00160613 // PC=0xa8 line=50: addi    x12, x12, 1     #should not run
+00537463 // PC=0xac line=52: bgeu     x6, x5, add_two   #test big_number>1
+00260613 // PC=0xb0 line=53: addi    x12, x12, 2     #should not run
+0179e463 // PC=0xb4 line=55: bltu     x19, x23, add_four   #test -16<-4
+00460613 // PC=0xb8 line=56: addi    x12, x12, 4     #should not run
+0139d463 // PC=0xbc line=58: bge     x19, x19, add_eight   #test -16=-16
+00860613 // PC=0xc0 line=59: addi    x12, x12, 8     #should not run
+0089d463 // PC=0xc4 line=61: bge     x19, x8, add_sixteen   #test -16>-109
+01060613 // PC=0xc8 line=62: addi    x12, x12, 16     #should not run
+00e7e463 // PC=0xcc line=64: bltu     x15, x14, add_more   #test 35<103
+02060613 // PC=0xd0 line=65: addi    x12, x12, 32     #should not run
+00000a97 // PC=0xd4 line=67: auipc   x21, 0
+00800b17 // PC=0xd8 line=68: auipc   x22, 2048 #8388608+216=8388824
+0a455bb7 // PC=0xdc line=69: lui     x23, 42069 #172314624
+00000013 // PC=0xe0 line=70: nop

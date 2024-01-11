@@ -1,0 +1,37 @@
+fff00093 // PC=0x0 line=1: addi  x1, x0, -1   # x01 = -1
+02300113 // PC=0x4 line=2: addi  x2, x0, 35   # x02 = 35
+00d08de7 // PC=0x8 line=3: jalr   x27,x1,13
+04414193 // PC=0xc line=4: xori  x3, x2, 68   # x03 = 103
+01116213 // PC=0x10 line=5: ori   x4, x2, 17   # x04 = 51
+01117293 // PC=0x14 line=6: andi  x5, x2, 17   # x05 = 1
+00809313 // PC=0x18 line=7: slli  x6, x1, 8    # x06 = -256
+0021d393 // PC=0x1c line=8: srli  x7, x3, 2    # x07 = 25
+40635413 // PC=0x20 line=9: srai  x8, x6, 6    # x08 = -4
+0230a493 // PC=0x24 line=10: slti  x9, x1, 35   # x09 = 1
+0230b513 // PC=0x28 line=11: sltiu x10, x1, 35  # x10 = 0
+001085b3 // PC=0x2c line=12: add   x11, x1, x1  # x11 = -2
+40108633 // PC=0x30 line=13: sub   x12, x1, x1  # x12 = 0
+00c0c6b3 // PC=0x34 line=14: xor   x13, x1, x12 # x13 = -1
+00316733 // PC=0x38 line=15: or    x14, x2, x3  # x14 = 103
+003177b3 // PC=0x3c line=16: and   x15, x2, x3  # x15 = 35
+00400813 // PC=0x40 line=17: addi  x16, x0, 4   # x16 = 4
+010118b3 // PC=0x44 line=18: sll   x17, x2, x16 # x17 = 560
+0101d933 // PC=0x48 line=19: srl   x18, x3, x16 # x18 = 6
+410359b3 // PC=0x4c line=20: sra   x19, x6, x16 # x19 = -16
+0020aa33 // PC=0x50 line=21: slt   x20, x1, x2  # x20 = 1
+0020bab3 // PC=0x54 line=22: sltu  x21, x1, x2  # x20 = 0
+002b0663 // PC=0x58 line=24: beq     x22, x2, loop_end
+001b0b13 // PC=0x5c line=25: addi    x22, x22, 1
+ff9ffe6f // PC=0x60 line=26: jal		x28, loop_head
+1a4e8e93 // PC=0x64 line=28: addi    x29, x29, 420
+fffb8b93 // PC=0x68 line=30: addi    x23, x23, -1
+fe8b9ee3 // PC=0x6c line=31: bne     x23, x8, loop_head2
+045f0f13 // PC=0x70 line=32: addi    x30, x30, 69
+01802f83 // PC=0x74 line=33: lw      x31, 24(x0)     #8426259
+2fe02c23 // PC=0x78 line=34: sw      x30, 760(x0)    #69
+3089ad03 // PC=0x7c line=35: lw      x26, 776(x19)   #69
+ffd8a823 // PC=0x80 line=36: sw      x29, -16(x17)   #420
+23000023 // PC=0x84 line=37: sb      x16, 544(x0)    #4
+22002c83 // PC=0x88 line=38: lw      x25, 544(x0)    #260
+07fe9f23 // PC=0x8c line=39: sh      x31, 126(x29)   #37651
+32032c03 // PC=0x90 line=40: lw      x24, 800(x6)    #-1827471100
