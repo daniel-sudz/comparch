@@ -109,7 +109,7 @@ test_rv32_ir_types: addi.validate itypes.validate irtypes.validate
 test_rv32_utypes: utypes.validate
 test_rv32_branch: beq.validate bne.validate blt.validate bge.validate bgeu.validate bltu.validate
 test_rv32_jal: jal_jalr.validate
-test_rv32_load: storeload.validate lb.validate
+test_rv32_load: storeload.validate storeload_2.validate 
 test_rv32_integrated: ari_1.validate ari_2.validate
 
 test_rv32_all: test_rv32_ir_types test_rv32_load test_rv32_branch test_rv32_jal test_rv32_utypes test_rv32_integrated
