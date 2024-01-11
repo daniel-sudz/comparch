@@ -55,3 +55,4 @@ ffd8a823 // PC=0x80 line=38: sw      x29, -16(x17)   #420
 00800b17 // PC=0xd8 line=68: auipc   x22, 2048 #8388608+216=8388824
 0a455bb7 // PC=0xdc line=69: lui     x23, 42069 #172314624
 00000013 // PC=0xe0 line=70: nop
+00000063 // PC=0xe4 line=73: beq x0, x0, trap

@@ -98,12 +98,19 @@ module rv32i_multicycle_core(
     wire zero;
     wire equal;
 
-
-   /* ---------------------- Non-Architectural Register Signals ---------------------- */
     logic alu_last_ena;
     wire [31:0] alu_last; // Not a descriptive name, but this is what it's called in the text.
+
+
+   /* ---------------------- Non-Architectural Register Signals ---------------------- */
+
+
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              Memory Decoder (begin)                                                */
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    logic [31:0] mem_data, mem_data_extended;
     logic mem_data_ena;
-    wire [31:0] mem_data;
+
     enum logic [2:0] {MEM_SRC_PC, MEM_SRC_ALU_LAST, MEM_SRC_RESULT} mem_src;
 
     always_comb begin : mem_src_signals
@@ -112,21 +119,38 @@ module rv32i_multicycle_core(
             MEM_SRC_ALU_LAST: mem_addr = alu_last;
         endcase
     end
+
+    always_comb begin: mem_extended_decoder
+        case(funct3)
+            3'b000: mem_data_extended = {{24{mem_data[7]}}, mem_data[7:0]};         // load byte, sign extend 7:0
+            3'b001: mem_data_extended = {{16{mem_data[15]}}, mem_data[15:0]};       // load byte, sign extend 15:0
+            3'b010: mem_data_extended = mem_data;                                   // load word, 31:0
+            3'b100: mem_data_extended = {24'b0, mem_data[7:0]};                     // load byte unsigned, 7:0 
+            3'b101: mem_data_extended = {16'b0, mem_data[15:0]};                    // load byte unsigned, 15:0 
+        endcase 
+    end
+
+    register #(.N(32), .RESET_VALUE(32'b0)) MEM_DATA_REGISTER (
+    .clk(clk), .rst(rst), .ena(mem_data_ena), .d(mem_rd_data), .q(mem_data)
+    );
+
+    /* -------------------------------------------------------------------------------------------------------------------*/
+    /*                                              Memory Decoder (end)                                                  */
+    /* -------------------------------------------------------------------------------------------------------------------*/
     
 
     register #(.N(32), .RESET_VALUE(32'b0)) ALU_RESULT_REGISTER (
     .clk(clk), .rst(rst), .ena(alu_last_ena), .d(alu_result), .q(alu_last)
     );
 
-    register #(.N(32), .RESET_VALUE(32'b0)) MEM_DATA_REGISTER (
-    .clk(clk), .rst(rst), .ena(mem_data_ena), .d(mem_rd_data), .q(mem_data)
-    );
+
     
 
     /* ---------------------- Result SRC Signals ---------------------- */
     enum logic [2:0] {
         RESULT_SRC_ALU, 
         RESULT_SRC_MEM_DATA, 
+        RESULT_SRC_MEM_DATA_EXTENDED,
         RESULT_SRC_ALU_LAST, 
         RESULT_SRC_PC_NEXT_INSTRUCTION,
         RESULT_SRC_IMMEDIATE
@@ -137,6 +161,7 @@ module rv32i_multicycle_core(
         case(result_src)
             RESULT_SRC_ALU: result = alu_result;
             RESULT_SRC_MEM_DATA: result = mem_data;
+            RESULT_SRC_MEM_DATA_EXTENDED: result = mem_data_extended;
             RESULT_SRC_ALU_LAST: result = alu_last;
             RESULT_SRC_PC_NEXT_INSTRUCTION: result = PC_next_instruction;
             RESULT_SRC_IMMEDIATE: result = extended_immediate;
@@ -241,8 +266,8 @@ module rv32i_multicycle_core(
         // mem_access is set the same for store/load during S_MEMREAD and S_MEMWRITE phases
         // special case for S_FETCH below where it swaps to MEM_ACCESS_WORD
         case(funct3)
-            3'b000: mem_access = MEM_ACCESS_BYTE;
-            3'b001: mem_access = MEM_ACCESS_HALF;
+            3'b000, 3'b100: mem_access = MEM_ACCESS_BYTE;
+            3'b001, 3'b101: mem_access = MEM_ACCESS_HALF;
             3'b010: mem_access = MEM_ACCESS_WORD;
         endcase
 
@@ -286,7 +311,7 @@ module rv32i_multicycle_core(
             // LOAD INSTRUCTION write back to RF 
             S_MEMWB: begin
                 set_default;
-                result_src = RESULT_SRC_MEM_DATA;
+                result_src = RESULT_SRC_MEM_DATA_EXTENDED;
                 reg_write = 1;
                 pc_next_src = PC_NEXT_INSTRUCTION;
                 PC_ena = 1;
