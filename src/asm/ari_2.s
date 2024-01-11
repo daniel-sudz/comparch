@@ -1,3 +1,5 @@
+# integrated test file courtesy of Ari Bobesh @Olin College of Engineering
+
 addi  x1, x0, -1   # x01 = -1
 addi  x2, x0, 35   # x02 = 35
 jalr   x27,x1,13
@@ -67,48 +69,6 @@ auipc   x22, 2048 #8388608+216=8388824
 lui     x23, 42069 #172314624
 nop
 
-# LMAO I CREATED AN UNBOUNDED MEMORY READ BY RUNNING THE PC INTO THE SAVED DATA HAHAHAHA
-# LMAO NOW I ENDED UP OVERWRITING AN INSTRUCTION WITH 69 OOPS
-
-#stage 1 testing
-|---------------------------------------|
-| Register File State                   |
-|---------------------------------------|
-|    x00, zero = 0x00000000 (         0)|
-|      x01, ra = 0xffffffff (        -1)|
-|      x02, sp = 0x00000023 (        35)|
-|      x03, gp = 0x00000067 (       103)|
-|      x04, tp = 0x00000033 (        51)|
-|      x05, t0 = 0x00000001 (         1)|
-|      x06, t1 = 0xffffff00 (      -256)|
-|      x07, t2 = 0x00000019 (        25)|
-|      x08, s0 = 0xfffffffc (        -4)|
-|      x09, s1 = 0x00000001 (         1)|
-|      x10, a0 = 0x00000000 (         0)|
-|      x11, a1 = 0xfffffffe (        -2)|
-|      x12, a2 = 0x00000000 (         0)|
-|      x13, a3 = 0xffffffff (        -1)|
-|      x14, a4 = 0x00000067 (       103)|
-|      x15, a5 = 0x00000023 (        35)|
-|      x16, a6 = 0x00000004 (         4)|
-|      x17, a7 = 0x00000230 (       560)|
-|      x18, s2 = 0x00000006 (         6)|
-|      x19, s3 = 0xfffffff0 (       -16)|
-|      x20, s4 = 0x00000001 (         1)|
-|      x21, s5 = 0x00000000 (         0)|
-|      x22, s6 = 0x00000023 (        35)| #35 times increment
-|      x23, s7 = 0xfffffffc (        -4)| #-4 times decrement
-|      x24, s8 = 0x93130104 (-1827471100)| #sh x31<<16 on top of 260 = -1827471100
-|      x25, s9 = 0x00000104 (       260)| #lw sw 420 then sb 4 so it's 260
-|     x26, s10 = 0x00000045 (        69)| #add 69
-|     x27, s11 = 0x0000000c (        12)| #jalr link 12
-|      x28, t3 = 0x00000064 (       100)| #jal link 100
-|      x29, t4 = 0x000001a4 (       420)| #add 420
-|      x30, t5 = 0x00000045 (        69)| #lw sw 69
-|      x31, t6 = 0x00809313 (   8426259)| #lw instruction 24
-|---------------------------------------|
-
-#stage 2 testing
 |---------------------------------------|
 | Register File State                   |
 |---------------------------------------|
