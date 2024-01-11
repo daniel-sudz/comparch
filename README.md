@@ -4,6 +4,8 @@
 
 ### CPU
 
+Extensive unit test coverage for instruction in https://github.com/daniel-sudz/comparch/tree/main/src/asm including two large integrated test files. 
+
 | R-types                       | I-types                                   |    Memory-types                    | Branches                        | Jumps                      | U-types
 | ----------------------------  | ------------------------------------------| -----------------------------------| --------------------------------| ---------------------------| --------------------------------------|
 | add   :white_check_mark:      | addi   :white_check_mark:                 |  lw  :white_check_mark:            |  beq   :white_check_mark:       | jal   :white_check_mark:   |  lui   :white_check_mark:             |
