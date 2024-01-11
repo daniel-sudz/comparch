@@ -11,7 +11,7 @@ Usage:
 WARNING: ./tests/provided/bytewise_distributed_ram.sv:58: $readmemh(../asm/out/ari_2.memh): Not enough words in the file for the requested range [0:1023].
 Running simulation of memory ../asm/out/ari_2.memh for up to       10000 cycles. Waves will be stored to rv32_simulator.fst.
 FST info: dumpfile rv32_simulator.fst opened for output.
-Ran       10000 cycles, finishing.
+!!! Infinite loop detected (over   4 iterations) - ending sim !!!
 #TESTASSERTOUTPUT|---------------------------------------|
 #TESTASSERTOUTPUT| Register File State :)                |
 #TESTASSERTOUTPUT|---------------------------------------|
@@ -36,9 +36,9 @@ Ran       10000 cycles, finishing.
 #TESTASSERTOUTPUT|      x18, s2 = 0x00000006 (         6)|
 #TESTASSERTOUTPUT|      x19, s3 = 0xfffffff0 (       -16)|
 #TESTASSERTOUTPUT|      x20, s4 = 0x00000001 (         1)|
-#TESTASSERTOUTPUT|      x21, s5 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x22, s6 = 0x00000023 (        35)|
-#TESTASSERTOUTPUT|      x23, s7 = 0xfffffffc (        -4)|
+#TESTASSERTOUTPUT|      x21, s5 = 0x000000d4 (       212)|
+#TESTASSERTOUTPUT|      x22, s6 = 0x008000d8 (   8388824)|
+#TESTASSERTOUTPUT|      x23, s7 = 0x0a455000 ( 172314624)|
 #TESTASSERTOUTPUT|      x24, s8 = 0x93130104 (-1827471100)|
 #TESTASSERTOUTPUT|      x25, s9 = 0x00000104 (       260)|
 #TESTASSERTOUTPUT|     x26, s10 = 0x00000045 (        69)|
