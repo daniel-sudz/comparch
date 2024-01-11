@@ -23,8 +23,8 @@ sb    x10, 8(x11)              # (MEM:1036) = 255 (32'b0000000000000000000000001
 
 # read full
 lw    x12, 0(x11)              # x12 = -1 (32'b11111111111111111111111111111111)
-lw    x13, 4(x11)              # x13 = -1 (32'b11111111111111111111111111111111)
-lw    x14, 8(x11)              # x14 = -1 (32'b11111111111111111111111111111111)
+lw    x13, 4(x11)              # x13 =  32'bXXXXXXXXXXXXXXXX1111111111111111
+lw    x14, 8(x11)              # x14 = -1 (32'bXXXXXXXXXXXXXXXXXXXXXXXX11111111)
 
 
 #TESTASSERTOUTPUT|---------------------------------------|
@@ -40,11 +40,11 @@ lw    x14, 8(x11)              # x14 = -1 (32'b11111111111111111111111111111111)
 #TESTASSERTOUTPUT|      x07, t2 = 0x000000ff (       255)|
 #TESTASSERTOUTPUT|      x08, s0 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x09, s1 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x10, a0 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x11, a1 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x12, a2 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x13, a3 = 0x00000000 (         0)|
-#TESTASSERTOUTPUT|      x14, a4 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x10, a0 = 0xffffffff (        -1)|
+#TESTASSERTOUTPUT|      x11, a1 = 0x00000404 (      1028)|
+#TESTASSERTOUTPUT|      x12, a2 = 0xffffffff (        -1)|
+#TESTASSERTOUTPUT|      x13, a3 = 0xxxxxffff (         X)|
+#TESTASSERTOUTPUT|      x14, a4 = 0xxxxxxxff (         X)|
 #TESTASSERTOUTPUT|      x15, a5 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x16, a6 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x17, a7 = 0x00000000 (         0)|
