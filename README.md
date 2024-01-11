@@ -3,66 +3,28 @@
 ## Components Checklist
 
 ### CPU
-- R-types (validated againt https://github.com/avinash-nonholonomy/olin-cafe-f23/blob/main/asm/irtypes.s)
-  - [x] add
-  - [x] sub
-  - [x] xor
-  - [x] or
-  - [x] and
-  - [x] sll
-  - [x] srl
-  - [x] sra
-  - [x] slt
-  - [x] sltu
-- I-types (validated against https://github.com/avinash-nonholonomy/olin-cafe-f23/blob/main/asm/irtypes.s)
-  - [x] addi
-  - [x] xori
-  - [x] ori
-  - [x] andi
-  - [x] slli
-  - [x] srli
-  - [x] srai
-  - [x] slti
-  - [x] sltiu
-- Memory-Types (Loads/Stores)
-  - [ ] lw
-  - [ ] sw
-  - [ ] *lb*
-  - [ ] *lh*
-  - [ ] *lbu*
-  - [ ] *lhu*
-  - [ ] *sb*
-  - [ ] *sh*
 
-- B-types (Branches)
-  - [ ] beq
-  - [ ] bne
-  - [ ] *blt*
-  - [ ] *bge*
-  - [ ] *bltu*
-  - [ ] *bgeu*
-- J-types (Jumps)
-  - [ ] jal
-  - [ ] jalr (technically an i-type)
-- U-types (Upper immediates)
-  - [ ] *lui*
-  - [ ] *auipc*
+| R-types                       | I-types                                   |    Memory-types                    | Branches                        | Jumps                      | U-types
+| ----------------------------  | ------------------------------------------| -----------------------------------| --------------------------------| ---------------------------| --------------------------------------|
+| add   :white_check_mark:      | addi   :white_check_mark:                 |  lw  :white_check_mark:            |  beq   :white_check_mark:       | jal   :white_check_mark:   |  lui   :white_check_mark:             |
+| sub   :white_check_mark:      | xori   :white_check_mark:                 |  sw  :white_check_mark:            |  bne   :white_check_mark:       | jalr  :white_check_mark:   |  auipc :white_check_mark:             |                 
+| xor   :white_check_mark:      | ori    :white_check_mark:                 |  lb  :white_check_mark:            |  blt   :white_check_mark:       |                            |                                       |                 
+| or    :white_check_mark:      | andi   :white_check_mark:                 |  lh  :white_check_mark:            |  bge   :white_check_mark:       |                            |                                       |                 
+| and   :white_check_mark:      | slli   :white_check_mark:                 |  lbu :white_check_mark:            |  bltu  :white_check_mark:       |                            |                                       |                 
+| sll   :white_check_mark:      | srli   :white_check_mark:                 |  lhu :white_check_mark:            |  bgeu  :white_check_mark:       |                            |                                       |                 
+| srl   :white_check_mark:      | srai   :white_check_mark:                 |  sb  :white_check_mark:            |                                 |                            |                                       |                 
+| sra   :white_check_mark:      | sltiu  :white_check_mark:                 |  sh  :white_check_mark:            |                                 |                            |                                       |                 
+| slt   :white_check_mark:      |                                           |                                    |                                 |                            |                                       |                 
+| sltu  :white_check_mark:      |                                           |                                    |                                 |                            |                                       |                 
+
 
 ### ALU
 - [x] 32bit (structural with SLTU/overflow)
 
 ### Shifters
-- sll
-  - [x] 32bit (structural with mux-32)
-  - [ ] any
-- srl
-  - [x] 32bit (structural with mux-32)
-  - [ ] any
-- sra
-  - [x] 32bit (structural with mux-32)
-  - [ ] any
-
-
+- [x] sll  (32bit structural with mux-32)
+- [x] srl  (32bit structural with mux-32)
+- [x] sra  (32bit structural with mux-32)
 
 ### Muxes
 - [x] mux2 (gate level)
@@ -82,12 +44,16 @@
 - [x] comparator_eq (gate level w/ codegen)
 - [x] comparator_lt (gate level w/ codegen)
 
-
 ## Harris and Harris
-- [ ] Chapter 1
-- [ ] Chapter 2
-- [ ] Chapter 3
-- [ ] Chapter 4
-- [ ] Chapter 5
-- [ ] Chapter 6
-- [ ] Chapter 7
+- [x] Chapter 6
+- [x] Chapter 7
+
+## Class Lectures
+- [x] 0x11: Memory, Microarchitecture
+- [x] 0x12: Reflection, RISC-V
+- 0x13: N/A Lecture Recording Missing from Archive
+- [x] 0x14: RV32i Core review, Memory Managment
+- [ ] 0x15: Branches, Jumps, Loops, Functions
+- [ ] 0x16: Advance Topics in CPU Design
+
+
