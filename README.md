@@ -4,7 +4,7 @@
 
 ### CPU
 
-Extensive unit test coverage for instruction in https://github.com/daniel-sudz/comparch/tree/main/src/asm including two large integrated test files. 
+Extensive unit test coverage for instructions in https://github.com/daniel-sudz/comparch/tree/main/src/asm including two large integrated test files. 
 
 | R-types                       | I-types                                   |    Memory-types                    | Branches                        | Jumps                      | U-types
 | ----------------------------  | ------------------------------------------| -----------------------------------| --------------------------------| ---------------------------| --------------------------------------|
