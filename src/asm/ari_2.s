@@ -72,39 +72,39 @@ nop
 trap:
 beq x0, x0, trap
 
-|---------------------------------------|
-| Register File State                   |
-|---------------------------------------|
-|    x00, zero = 0x00000000 (         0)|
-|      x01, ra = 0xffffffff (        -1)|
-|      x02, sp = 0x00000023 (        35)|
-|      x03, gp = 0x00000067 (       103)|
-|      x04, tp = 0x00000033 (        51)|
-|      x05, t0 = 0x00000001 (         1)|
-|      x06, t1 = 0xffffff00 (      -256)|
-|      x07, t2 = 0x00000019 (        25)|
-|      x08, s0 = 0xffffff93 (      -109)|
-|      x09, s1 = 0x00000093 (       147)|
-|      x10, a0 = 0xffff9313 (    -27885)|
-|      x11, a1 = 0x00009313 (     37651)|
-|      x12, a2 = 0x00000000 (         0)|
-|      x13, a3 = 0xffffffff (        -1)|
-|      x14, a4 = 0x00000067 (       103)|
-|      x15, a5 = 0x00000023 (        35)|
-|      x16, a6 = 0x00000004 (         4)|
-|      x17, a7 = 0x00000230 (       560)|
-|      x18, s2 = 0x00000006 (         6)|
-|      x19, s3 = 0xfffffff0 (       -16)|
-|      x20, s4 = 0x00000001 (         1)|
-|      x21, s5 = 0x000000d4 (       212)|
-|      x22, s6 = 0x008000d8 (   8388824)|
-|      x23, s7 = 0x0a455000 ( 172314624)|
-|      x24, s8 = 0x93130104 (-1827471100)|
-|      x25, s9 = 0x00000104 (       260)|
-|     x26, s10 = 0x00000045 (        69)|
-|     x27, s11 = 0x0000000c (        12)|
-|      x28, t3 = 0x00000064 (       100)|
-|      x29, t4 = 0x000001a4 (       420)|
-|      x30, t5 = 0x00000045 (        69)|
-|      x31, t6 = 0x00809313 (   8426259)|
-|---------------------------------------|
+#TESTASSERTOUTPUT|---------------------------------------|
+#TESTASSERTOUTPUT| Register File State :)                |
+#TESTASSERTOUTPUT|---------------------------------------|
+#TESTASSERTOUTPUT|    x00, zero = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x01, ra = 0xffffffff (        -1)|
+#TESTASSERTOUTPUT|      x02, sp = 0x00000023 (        35)|
+#TESTASSERTOUTPUT|      x03, gp = 0x00000067 (       103)|
+#TESTASSERTOUTPUT|      x04, tp = 0x00000033 (        51)|
+#TESTASSERTOUTPUT|      x05, t0 = 0x00000001 (         1)|
+#TESTASSERTOUTPUT|      x06, t1 = 0xffffff00 (      -256)|
+#TESTASSERTOUTPUT|      x07, t2 = 0x00000019 (        25)|
+#TESTASSERTOUTPUT|      x08, s0 = 0xffffff93 (      -109)|
+#TESTASSERTOUTPUT|      x09, s1 = 0x00000093 (       147)|
+#TESTASSERTOUTPUT|      x10, a0 = 0xffff9313 (    -27885)|
+#TESTASSERTOUTPUT|      x11, a1 = 0x00009313 (     37651)|
+#TESTASSERTOUTPUT|      x12, a2 = 0x00000000 (         0)|
+#TESTASSERTOUTPUT|      x13, a3 = 0xffffffff (        -1)|
+#TESTASSERTOUTPUT|      x14, a4 = 0x00000067 (       103)|
+#TESTASSERTOUTPUT|      x15, a5 = 0x00000023 (        35)|
+#TESTASSERTOUTPUT|      x16, a6 = 0x00000004 (         4)|
+#TESTASSERTOUTPUT|      x17, a7 = 0x00000230 (       560)|
+#TESTASSERTOUTPUT|      x18, s2 = 0x00000006 (         6)|
+#TESTASSERTOUTPUT|      x19, s3 = 0xfffffff0 (       -16)|
+#TESTASSERTOUTPUT|      x20, s4 = 0x00000001 (         1)|
+#TESTASSERTOUTPUT|      x21, s5 = 0x000000d4 (       212)|
+#TESTASSERTOUTPUT|      x22, s6 = 0x008000d8 (   8388824)|
+#TESTASSERTOUTPUT|      x23, s7 = 0x0a455000 ( 172314624)|
+#TESTASSERTOUTPUT|      x24, s8 = 0x93130104 (-1827471100)|
+#TESTASSERTOUTPUT|      x25, s9 = 0x00000104 (       260)|
+#TESTASSERTOUTPUT|     x26, s10 = 0x00000045 (        69)|
+#TESTASSERTOUTPUT|     x27, s11 = 0x0000000c (        12)|
+#TESTASSERTOUTPUT|      x28, t3 = 0x00000064 (       100)|
+#TESTASSERTOUTPUT|      x29, t4 = 0x000001a4 (       420)|
+#TESTASSERTOUTPUT|      x30, t5 = 0x00000045 (        69)|
+#TESTASSERTOUTPUT|      x31, t6 = 0x00809313 (   8426259)|
+#TESTASSERTOUTPUT|---------------------------------------|

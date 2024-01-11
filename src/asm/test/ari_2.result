@@ -24,9 +24,9 @@ FST info: dumpfile rv32_simulator.fst opened for output.
 #TESTASSERTOUTPUT|      x06, t1 = 0xffffff00 (      -256)|
 #TESTASSERTOUTPUT|      x07, t2 = 0x00000019 (        25)|
 #TESTASSERTOUTPUT|      x08, s0 = 0xffffff93 (      -109)|
-#TESTASSERTOUTPUT|      x09, s1 = 0x93130104 (-1827471100)|
+#TESTASSERTOUTPUT|      x09, s1 = 0x00000093 (       147)|
 #TESTASSERTOUTPUT|      x10, a0 = 0xffff9313 (    -27885)|
-#TESTASSERTOUTPUT|      x11, a1 = 0x93130104 (-1827471100)|
+#TESTASSERTOUTPUT|      x11, a1 = 0x00009313 (     37651)|
 #TESTASSERTOUTPUT|      x12, a2 = 0x00000000 (         0)|
 #TESTASSERTOUTPUT|      x13, a3 = 0xffffffff (        -1)|
 #TESTASSERTOUTPUT|      x14, a4 = 0x00000067 (       103)|

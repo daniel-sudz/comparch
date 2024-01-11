@@ -125,8 +125,8 @@ module rv32i_multicycle_core(
             3'b000: mem_data_extended = {{24{mem_data[7]}}, mem_data[7:0]};         // load byte, sign extend 7:0
             3'b001: mem_data_extended = {{16{mem_data[15]}}, mem_data[15:0]};       // load byte, sign extend 15:0
             3'b010: mem_data_extended = mem_data;                                   // load word, 31:0
-            3'b100: mem_data_extended = mem_data;                                   // load byte unsigned, 7:0 (memory already masks read for us)
-            3'b101: mem_data_extended = mem_data;                                   // load half unsigned, 15:0 (memory already masks read for us)
+            3'b100: mem_data_extended = {24'b0, mem_data[7:0]};                     // load byte unsigned, 7:0 
+            3'b101: mem_data_extended = {16'b0, mem_data[15:0]};                    // load byte unsigned, 15:0 
         endcase 
     end
 
