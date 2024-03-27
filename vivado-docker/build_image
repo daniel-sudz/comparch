@@ -1,5 +1,5 @@
 #!/bin/bash -ex
-export HOST_TOOL_ARCHIVE_NAME="FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin"
+export HOST_TOOL_ARCHIVE_NAME="FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256.tar.gz"
 
 sudo docker build \
 		-t xilinx-vivado:latest \
