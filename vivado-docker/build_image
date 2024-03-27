@@ -1,0 +1,9 @@
+#!/bin/bash -ex
+export HOST_TOOL_ARCHIVE_NAME="FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin"
+
+sudo docker build \
+		-t xilinx-vivado:latest \
+        --platform linux/amd64 \
+		--build-arg HOST_TOOL_ARCHIVE_NAME=${HOST_TOOL_ARCHIVE_NAME} \
+		--build-arg INSTALL_TARGET_DIR="/xilinx" \
+        .
